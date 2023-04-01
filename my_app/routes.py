@@ -1,8 +1,9 @@
 from my_app import app
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import request, render_template
-from flask import redirect, url_for
-from flask import g
 import random
+
+password = 'pbkdf2:sha256:260000$0GvFMplE$716898ae3aba1bf8791864a6191150ceb4cff407dd46235e7b53dee295cd6be1'
 
 enigmes = {}
 enigmes['id1'] = {'question': 'Quel est le nom du cheval d\'Alexandre ?', 'reponse': 'Bucéphale'}
@@ -12,43 +13,16 @@ enigmes['id4'] = {'question': 'Quel est le nom de l\'auteur qui a décrit les 3 
 enigmes['id5'] = {'question': 'Quelle est la formule chimique de l\'acide sulfurique ?', 'reponse': 'H2SO4'}
 
 id = 6
-#print(*enigmes)
-key = ''
-reponse=''
 
-def toto():
-    return 'bonjour'
-@app.route("/", methods=['GET'])
-def affiche_enigme():
-    global key
-    # Si la clé est vide, sélectionner une énigme.  Sinon, reproposer la dernière énigme.
-   # if request.args.get('reponse'):
-       # reponse = request.args.get('reponse')
-   #     return redirect(url_for('envoyer_resultat'))
-    if not key:
-        key = random.choice(list(enigmes))
-    enigme = enigmes[key]["question"]
-    return render_template("question.html",enigme = enigme)
+@app.route("/test")
+def test():
+    message = app.config['SQLALCHEMY_DATABASE_URI']
+    message = password
+    return message
 
-@app.route("/reponse", methods=['POST'])
-def verifier_reponse():
-    global reponse
-    global key
-    reponse = request.form['reponse']
-    #if reponse == enigmes[key]["reponse"]:
-    #    key = ''
-    #    return "Bravo, tu es un chef !"
-    #else:
-    #    return redirect('/', code=302)
-    g.reponse = reponse
-    return toto()
+@app.route('/liste')
+def login():
+    return 'Hi'
 
 
-def resultat():
-    global key
-    if g.reponse == enigmes[key]["reponse"]:
-        key = ''
-        return "Bravo, tu es un chef !"
-    else:
-        return "bonjour"
-        #return redirect('/', code=302)
+
