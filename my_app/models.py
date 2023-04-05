@@ -1,8 +1,14 @@
 from my_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from my_app import login_manager
+from flask_login import UserMixin
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class User(UserMixin,db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -18,4 +24,19 @@ class User(db.Model):
     def __repr__(self):
         return "username = %s, email = %s" % (self.username, self.email)
 
-    
+class Enigma(db.Model):
+    __tablename__ = 'enigmas'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    enigma = db.Column(db.String(250), unique=True, nullable=False)
+    response = db.Column(db.String(100), unique=True, nullable=False)
+    level = db.Column(db.Integer, nullable=False)
+
+    def set_enigma(self, enigma, response,level):
+        self.enigma = enigma
+        self.response = response
+        self.level = level
+
+    def __repr__(self):
+        return "Enigma = %s; Solution = %s; Level = %i" % (self.enigma,self.response, self.level)
+
+
