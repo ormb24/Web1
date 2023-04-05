@@ -15,6 +15,10 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
 
+    def __init__(self, username, email):
+        self.username = username
+        self.email = email
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -31,7 +35,7 @@ class Enigma(db.Model):
     response = db.Column(db.String(100), unique=True, nullable=False)
     level = db.Column(db.Integer, nullable=False)
 
-    def set_enigma(self, enigma, response,level):
+    def __init__(self, enigma, response, level):
         self.enigma = enigma
         self.response = response
         self.level = level

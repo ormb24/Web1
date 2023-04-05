@@ -1,0 +1,8 @@
+<form method="POST" action="/kamoulox" novalidate>
+    {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->
+
+    {{ form.enigma.label }} {{ form.enigma(size=250) }} <br>
+    {{ form.response.label }} {{ form.response(size=100) }} <br>
+    {{ form.level.label }} {{ form.level(size=2) }} <br>
+    {{ form.submit }}
+</form>

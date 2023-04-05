@@ -1,0 +1,9 @@
+<form method="POST" action="/login" novalidate>
+    {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->
+
+    <!-- {% if form.errors %} {% for message in form.password.errors %} {{ message }} {% endfor %} {% endif %} !-->
+
+    {{ form.email.label }} {{ form.email(size=60) }} <br>
+    {{ form.password.label }} {{ form.password(size=15) }} <br>
+    {{ form.submit }}
+</form>

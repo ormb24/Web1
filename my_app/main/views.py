@@ -1,48 +1,45 @@
-from my_app import app, db
-from flask import render_template, redirect, url_for
-from my_app.forms import PasswordForm, LoginForm
-from my_app.models import User
+from flask import render_template, session, redirect, url_for, request, flash
+from . import main
 from flask_login import login_required
+from .forms import CreateEnigmaForm
+from .. import db
+from ..models import Enigma
 
-@app.route('/secret')
+@main.route('/')
+def index():
+    return "Bienvenue sur la page d'accueil !"
+
+@main.route('/liste')
 @login_required
-def secret():
-    return 'Only authenticated users are allowed'
+def list_enigmas():
+    enigmas = Enigma.query.all()
+    #return 'Liste des énigmes'
+    return render_template('main/list_enigma.html', enigmas=enigmas)
 
-@app.route('/toto')
-def toto():
-    result = User.query.filter_by(username='olivier').first().check_password('bonjour')
-    return "bonjour %s" % result
-
-@app.route('/liste', methods=['GET','POST'])
-def login_password():
-    form = PasswordForm()
-    if form.validate_on_submit():
-        # Pour les besoins de l'exercice, on utilisera le mot de passe associé à l'utilisateur 'olivier' pour se logger..
-        # ... au lieu de 'hardcoder' le mot de passe dans le code Python.
-        user = User.query.filter_by(username='olivier').first()
-        if user is not None:
-            if user.check_password(form.password.data):
-                return "Bravo, le mot de passe %s est validé" % password
-    return render_template('login_form.html', form=form)
-
-@app.route('/kamoulox', methods=['GET','POST'])
+@main.route('/kamoulox', methods=['GET','POST'])
+#@login_required
 def create_enigmas():
-    return render_template('create_enigma.html', form=form)
+    if request.method == "GET":
+        session['next'] = request.args.get('next')
+
+    form = CreateEnigmaForm()
+    if form.validate_on_submit():
+        #return "Enigme : {}; Reponse : {}, Level : {}".format(enigma,response,level)
+        enigma=Enigma(form.enigma.data, form.response.data, int(form.level.data))
+        db.session.add(enigma)
+        db.session.commit()
+        flash('Enigme ajoutée avec succès')
+
+        next = session.get('next')
+        if next is None or not next.startswith('/'):
+            next = url_for('main.index')
+        return redirect(next)
+    else:
+        return render_template('main/create_enigma.html', form=form)
 
 
 
 
-
-
-
-
-
-
-
-
-
-password = 'pbkdf2:sha256:260000$0GvFMplE$716898ae3aba1bf8791864a6191150ceb4cff407dd46235e7b53dee295cd6be1'
 
 enigmes = {}
 enigmes['id1'] = {'question': 'Quel est le nom du cheval d\'Alexandre ?', 'reponse': 'Bucéphale'}
@@ -53,11 +50,6 @@ enigmes['id5'] = {'question': 'Quelle est la formule chimique de l\'acide sulfur
 
 id = 6
 
-@app.route("/test")
-def test():
-    message = app.config['SQLALCHEMY_DATABASE_URI']
-    message = password
-    return message
 
 
 
