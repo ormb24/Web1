@@ -1,6 +1,7 @@
 {% import "macros/macros.html" as macro %}
 {% extends "main.html" %}
 {{ macro.flash() }}
+
 {% block body %}
 <form method="POST" action="/login" novalidate>
     {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->

@@ -29,8 +29,11 @@
     <div class="enigma-response" style="clear:left;display:none" id="response_{{ loop.index }}">Réponse : {{ enigma.response }}</div>
 
 
+
 {% endfor %}
-
-
 {% endblock %}
-
+{% block footer %}
+<div class="pagination">
+    {{ macro.pagination_widget(pagination, 'main.list_enigmas') }}
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ class DevelopmentConfig(Config):
     ENV = "development"
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'vc-dev.db')
     TEMPLATE_AUTO_RELOAD = True
+    ENIGMAS_PER_PAGE = 5 #nombre d'énigmes par page, si la pagination est utilisée.
 
 class ProductionConfig(Config):
     DEBUG = False
