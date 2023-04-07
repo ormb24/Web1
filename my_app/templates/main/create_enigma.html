@@ -3,15 +3,17 @@
 
 {% block body %}
 <h1>Créez vos énigmes</h1>
-{{ macro.flash() }}
 <form  action="/kamoulox" method="POST" novalidate>
     <div class="form-group">
     {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->
 
-    {{ form.enigma.label }} {{ form.enigma(size=100) }} <br>
-    {{ form.response.label }} {{ form.response(size=100) }} <br>
-    {{ form.level.label }} {{ form.level(size=2) }} <br>
+    {{ form.enigma.label(class='enigma_label')}} {{ form.enigma }} <br>
+    {{ form.response.label(class='enigma_label') }} {{ form.response }} <br>
+    {{ form.level.label(class='enigma_label') }} {{ form.level(size=2) }} <br>
     </div>
     {{ form.submit }}
 </form>
+{% endblock %}
+{%block footer %}
+    {{ macro.flash() }}
 {% endblock %}

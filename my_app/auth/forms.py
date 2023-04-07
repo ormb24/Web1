@@ -6,7 +6,3 @@ class LoginForm( FlaskForm ):
     email = StringField('Email', validators=[DataRequired(),Length(1,64),Email()])
     password = PasswordField(label='Password', validators=[DataRequired(), Length(min=8, message="Le mot de passe doit comprendre au moins %(min)d caractères !")])
     submit = SubmitField('Log in')
-
-#class PasswordForm( FlaskForm ):
-#    password = PasswordField(label='Password', validators=[InputRequired(),Length(min=8, message="Password shoud be at least %(min)d characters long")])
-#    submit = SubmitField('Send')

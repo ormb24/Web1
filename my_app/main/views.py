@@ -2,7 +2,7 @@ from flask import render_template, session, redirect, url_for, request, flash
 
 import my_app
 from . import main
-from flask_login import login_required
+from flask_login import login_required, current_user
 from .forms import CreateEnigmaForm
 from .. import db
 from ..models import Enigma
@@ -10,7 +10,6 @@ from ..models import Enigma
 @main.route('/')
 def index():
     return infos()
-
 
 @main.route('/infos')
 def infos():
@@ -33,21 +32,32 @@ def create_enigmas():
     #if request.method == "GET":
     #    session['next'] = request.args.get('next')
 
+    isError=False
     form = CreateEnigmaForm()
-    if form.validate_on_submit():
-        #return "Enigme : {}; Reponse : {}, Level : {}".format(enigma,response,level)
-        enigma=Enigma(form.enigma.data, form.response.data, int(form.level.data))
-        db.session.add(enigma)
-        db.session.commit()
-        flash('Enigme ajoutée avec succès')
 
-        #next = session.get('next')
-        #if next is None or not next.startswith('/'):
-        #    next = url_for('main.index')
-        #return redirect(next)
-    else:
-        flash("L\'ajout de l\'enigme a échoué !")
-        return render_template('main/create_enigma.html', form=form)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            #return "Enigme : {}; Reponse : {}, Level : {}".format(enigma,response,level)
+            try:
+                enigma=Enigma(form.enigma.data, form.response.data, int(form.level.data))
+                db.session.add(enigma)
+                db.session.commit()
+            except BaseException as e:
+                isError=True
+                flash('Un problème est survenu lors de l\'insertion dans la base de données : '+str(e))
+
+            #next = session.get('next')
+            #if next is None or not next.startswith('/'):
+            #    next = url_for('main.index')
+            #return redirect(next)
+        else:
+            isError=True
+
+        if not isError:
+            flash('Enigme ajoutée avec succès')
+        else:
+            flash("L\'ajout de l\'enigme a échoué !")
+            #return render_template('main/create_enigma.html', form=form)
     return render_template('main/create_enigma.html', form=form)
 @main.route('/level', methods=['GET'])
 @login_required

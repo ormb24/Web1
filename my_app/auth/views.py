@@ -1,5 +1,5 @@
 from flask import render_template, redirect, request, url_for, flash, session
-from flask_login import login_user
+from flask_login import login_user,logout_user
 from . import auth
 from ..models import User
 from .forms import LoginForm
@@ -22,3 +22,8 @@ def login():
             return redirect(next)
         flash("Nom d\'utilisateur ou mot de passe incorrect !")
     return render_template('auth/login.html', form=form)
+
+@auth.route('/logout')
+def logout():
+    logout_user()
+    return login()

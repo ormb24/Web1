@@ -4,7 +4,6 @@
 
 <h1>Liste des énigmes</h1>
 
-{{ macro.flash() }}
 {% for enigma in enigmas %}
 
     <div style="display:flex;padding-bottom:5px">
@@ -36,4 +35,5 @@
 <div class="pagination">
     {{ macro.pagination_widget(pagination, 'main.list_enigmas') }}
 </div>
+    {{ macro.flash() }}
 {% endblock %}
