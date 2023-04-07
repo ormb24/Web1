@@ -7,7 +7,11 @@ from ..models import Enigma
 
 @main.route('/')
 def index():
-    return "Bienvenue sur la page d'accueil !"
+    return list_enigmas()
+
+@main.route('/infos')
+def infos():
+    return render_template('main/infos.html')
 
 @main.route('/liste')
 @login_required
@@ -17,7 +21,7 @@ def list_enigmas():
     return render_template('main/list_enigma.html', enigmas=enigmas)
 
 @main.route('/kamoulox', methods=['GET','POST'])
-#@login_required
+@login_required
 def create_enigmas():
     if request.method == "GET":
         session['next'] = request.args.get('next')
@@ -37,18 +41,20 @@ def create_enigmas():
     else:
         return render_template('main/create_enigma.html', form=form)
 
+@main.route('/level', methods=['GET'])
+@login_required
+def update_level():
+    id = request.args.get("id")
+    enigma = Enigma.query.filter_by(id=id).first()
+    if request.args.get("direction") == 'up':
+        enigma.set_level(enigma.level +1)
+    elif enigma.level > 0:
+         enigma.set_level(enigma.level -1)
+    else:
+        flash("Le niveau ne peut être inférieur à 0 !")
+    db.session.commit()
+    return list_enigmas()
 
-
-
-
-enigmes = {}
-enigmes['id1'] = {'question': 'Quel est le nom du cheval d\'Alexandre ?', 'reponse': 'Bucéphale'}
-enigmes['id2'] = {'question': 'Quel est le nom du deuxième homme à avoir marché sur la lune ?', 'reponse': 'Aldrin'}
-enigmes['id3'] = {'question': 'Quel est le nom du premier empereur romain ?', 'reponse': 'Auguste'}
-enigmes['id4'] = {'question': 'Quel est le nom de l\'auteur qui a décrit les 3 lois de la robotique en S-F ?', 'reponse': 'Asimov'}
-enigmes['id5'] = {'question': 'Quelle est la formule chimique de l\'acide sulfurique ?', 'reponse': 'H2SO4'}
-
-id = 6
 
 
 

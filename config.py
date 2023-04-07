@@ -8,6 +8,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     ENV = "development"
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'vc-dev.db')
+    TEMPLATE_AUTO_RELOAD = True
 
 class ProductionConfig(Config):
     DEBUG = False

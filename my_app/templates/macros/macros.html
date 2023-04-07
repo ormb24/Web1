@@ -1,0 +1,17 @@
+<!-- exemple du cours :
+{% macro task_item(key, task) %}
+<a href="/delete?name={{ task.name }}&id={{ key }}" class="btn btn-danger">Delete</a>
+<a href="/update?name={{ task.name }}&id={{ key }}" class="btn">Update</a>
+{% endmacro %}
+-->
+
+
+{% macro flash() %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

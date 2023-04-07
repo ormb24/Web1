@@ -1,5 +1,36 @@
+{% import "macros/macros.html" as macro %}
+{% extends "main.html" %}
+{% block body %}
+
+<h1>Liste des énigmes</h1>
+
+{{ macro.flash() }}
 {% for enigma in enigmas %}
-    {{ enigma.enigma }}
-    {{ enigma.response }}
-    {{ enigma.level }} <br>
+
+    <div style="display:flex;padding-bottom:5px">
+        <div class="enigma-question" style="flex-grow:1">{{ enigma.enigma }}</div>
+        <div >
+            <button onclick="showResponse(response_{{ loop.index }})">Show / Hide</button>
+        </div>
+
+        <div class="enigma-level" >{{ enigma.level }}</div>
+        <div>
+            <a href="/level?id={{ enigma.id }}&direction=up">
+                <img src="/static/img/file-arrow-up-fill.svg" style="min-height:100%;margin-right:10px" >
+            </a>
+        </div>
+        <div>
+            <a href="/level?id={{ enigma.id }}&direction=down">
+                <img src="/static/img/file-arrow-down-fill.svg" style="min-height:100%" >
+            </a>
+        </div>
+
+    </div>
+    <div class="enigma-response" style="clear:left;display:none" id="response_{{ loop.index }}">Réponse : {{ enigma.response }}</div>
+
+
 {% endfor %}
+
+
+{% endblock %}
+

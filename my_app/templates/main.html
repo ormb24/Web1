@@ -1,14 +1,40 @@
 <html>
-<head>
-    <title>Vicious Clues</title>
-    <link href="/static/css/my.css" rel="stylesheet">
-</head>
-<body>
-    <div class="vicious" >Vicious</div>
-    <div class="login">
-        {% block login %}{% endblock %}
-    </div>
+    <head>
+        <title>Vicious Clues</title>
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.css" rel="stylesheet">
+        <link href="/static/css/my.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">HomePage</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/liste">Liste des énigmes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/kamoulox">Créer une énigme</a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link" href="/infos">Infos</a>
+                </li>
+            </ul>
+        </nav>
 
+        <div class="container" style="margin-top: 60px">
+            {% block body %}{% endblock %}
+        </div>
 
-</body>
+        <footer>
+            {% block footer %}{% endblock %}
+        </footer>
+        <!--
+        <script src="/static/js/jquery-3.6.3.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        -->
+        <script src="/static/js/bootstrap.js"></script>
+        <script src="/static/js/my.js"></script>
+    </body>
 </html>

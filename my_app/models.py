@@ -39,6 +39,8 @@ class Enigma(db.Model):
         self.enigma = enigma
         self.response = response
         self.level = level
+    def set_level(self,level):
+        self.level = level
 
     def __repr__(self):
         return "Enigma = %s; Solution = %s; Level = %i" % (self.enigma,self.response, self.level)
