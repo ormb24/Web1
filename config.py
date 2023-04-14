@@ -1,7 +1,11 @@
 import os, binascii
+# Returns a normalized absolutized version of the pathname passed as argument.
+# Note : so the path is given correctly, whatever the underlying OS used.
 basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
+    # Used for generating cryptographic signatures by Flask-WTF to protect forms against CSRF
     SECRET_KEY = binascii.hexlify(os.urandom(24))
+    # False : uses less memory, unless signals for object changes are neeeded.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):

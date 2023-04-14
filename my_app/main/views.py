@@ -3,9 +3,9 @@ from flask import render_template, session, redirect, url_for, request, flash
 import my_app
 from . import main
 from flask_login import login_required, current_user
-from .forms import CreateEnigmaForm
+from .forms import CreateEnigmaForm, RiddleForm
 from .. import db
-from ..models import Enigma
+from ..models import Enigma, Riddle
 
 @main.route('/')
 def index():
@@ -25,6 +25,15 @@ def list_enigmas():
     ##enigmas = Enigma.query.all()
     #return 'Liste des énigmes'
     ##return render_template('main/list_enigma.html', enigmas=enigmas)
+
+@main.route('/list_riddle', methods=['GET','POST'])
+#@login_required
+def list_riddles():
+    #page = request.args.get('page', 1, type=int)
+    #pagination = Enigma.query.order_by(Enigma.id.asc()).paginate(page=page, per_page=5)
+    #enigmas = pagination.items
+    riddles = Riddle.query.order_by(Riddle.id.asc())
+    return render_template('main/list_riddle.html', riddles=riddles)
 
 @main.route('/kamoulox', methods=['GET','POST'])
 @login_required
@@ -74,7 +83,53 @@ def update_level():
     return list_enigmas()
 
 
+@main.route('/create_riddle', methods=['GET','POST'])
+def create_riddle():
+    form = RiddleForm()
+    if form.validate_on_submit():
+        riddle = form.riddle.data
+        answer = form.answer.data
+        level = int(form.level.data)
+        try:
+            new_riddle = Riddle(riddle=riddle,answer=answer,level=level)
+            db.session.add(new_riddle)
+            db.session.commit()
+            flash("L'énigme a été ajoutée avec succès !", "Success")
+            form.riddle.data = ''
+            form.answer.data = ''
+            form.level.data = 1
+        except BaseException as e:
+            flash("Echec de l'ajout de l'énigme en DB : "+str(e),"Danger")
+    else:
+        flash("Les données du formulaire ne sont pas valides !","Warning")
+    return render_template("main/create_riddle.html",form=form, action="Create")
 
+@main.route('/update_riddle', methods=['GET','POST'])
+def update_riddle():
+    id = request.args.get('id')
+    form = RiddleForm()
+    try:
+        riddle = Riddle.query.filter_by(id=id).first()
+        form.id.data = riddle.id
+        form.riddle.data = riddle.riddle
+        form.answer.data = riddle.answer
+        form.level.data = riddle.level
+    except BaseException as e:
+        flash("L'énigme n'a pu être trouvée en DB : "+str(e))
+    return render_template("main/create_riddle.html", form=form, action="Update")
 
+@main.route('/delete_riddle', methods=['GET'])
+def delete_riddle():
+    id = request.args.get('id')
+    try:
+        riddle = Riddle.query.filter_by(id=id).first()
+        db.session.delete(riddle)
+        db.session.commit()
+    except BaseException as e:
+        flash("L'énigme n'a pas été supprimée : "+ str(e))
+    return list_riddles()
 
+@main.route('/bootstrap')
+def bootstrap():
+    return render_template('main/bootstrap_test.html')
 

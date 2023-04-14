@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, IntegerField, BooleanField, SubmitField, TextAreaField
+from wtforms import StringField, PasswordField, IntegerField, BooleanField, SubmitField, TextAreaField, HiddenField
 from wtforms.validators import InputRequired, Length, ValidationError, EqualTo, DataRequired, Email, NumberRange
 
 class CreateEnigmaForm( FlaskForm ):
@@ -9,3 +9,16 @@ class CreateEnigmaForm( FlaskForm ):
     level = IntegerField(label='Niveau : ', validators=[InputRequired(), NumberRange(min=0, max=10, message="Le niveau de difficulté doit être compris entre 0 et 5 !")])
     submit = SubmitField('Ajouter')
 
+class RiddleForm( FlaskForm):
+    id = HiddenField("riddle_id")
+    riddle = TextAreaField(label='Enigme : ',
+                           validators=[DataRequired(message="Le champ ne peut être vide !"),
+                                       Length(max=250, message="L\énigme ne peut comporter plus de %(max)d caractères !")])
+    answer = TextAreaField(label='Réponse :',
+                           validators=[DataRequired(message="Le champ ne peut être vide !"),
+                                       Length(max=100, message="La réponse ne peut comporter plus de %(max)d caractères !")])
+    level = IntegerField(label='Niveau : ',
+                         validators=[DataRequired(message="Veuillez entrer une valeur !"),
+                                     NumberRange(min=0, max=10, message="Le niveau de difficulté doit être compris entre %(min)d et %(max)d !")
+                                                        ])
+    submit = SubmitField(label='Ajouter')

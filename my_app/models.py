@@ -46,3 +46,14 @@ class Enigma(db.Model):
         return "Enigma = %s; Solution = %s; Level = %i" % (self.enigma,self.response, self.level)
 
 
+class Riddle(db.Model):
+    __tablename__ = 'riddles'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    riddle = db.Column(db.String(250), unique=True, nullable=False)
+    answer = db.Column(db.String(100), nullable=False)
+    level = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        rep = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
+        return rep
+

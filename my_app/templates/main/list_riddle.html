@@ -1,0 +1,32 @@
+{% import "macros/macros.html" as macro %}
+{% extends "main.html" %}
+{% block body %}
+
+<h1>Liste des énigmes</h1>
+<div class="list-group">
+{% for riddle in riddles %}
+    <div class="row">
+        <div class="col-9">
+            {% if riddle.hidden == True %}
+                <a href="/riddle_show?id={{ riddle.id }}" class="list-group-item list-group-item-action">{{ riddle.riddle }}</a>
+            {% else %}
+                <a href="/riddle_hide?id={{ riddle.id }}" class="list-group-item list-group-item-action">
+                    {{ riddle.riddle}}<br/>
+                    {{ riddle.answer}}
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-1">
+            {{ riddle.level }}
+        </div>
+        <div class="col-2">
+            <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a>
+            <a href="update_riddle?id={{riddle.id}}" class="btn btn-info">Edit</a>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}
+{% block footer %}
+
+{% endblock %}

@@ -43,3 +43,8 @@
     </li>
 </ul>
 {% endmacro %}
+
+{% macro riddle_item(id) %}
+<a href="riddle_delete?id={{id}}" class="btn btn-danger">Delete</a>
+<a href="riddle_update?id={{id}}" class="btn btn-info">Update</a>
+{% endmacro %}
