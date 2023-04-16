@@ -53,6 +53,10 @@ class Riddle(db.Model):
     answer = db.Column(db.String(100), nullable=False)
     level = db.Column(db.Integer, nullable=False)
 
+    def __init__(self, riddle, answer, level):
+        self.riddle = riddle
+        self.answer = answer
+        self.level = level
     def __repr__(self):
         rep = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
         return rep

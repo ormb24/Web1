@@ -86,25 +86,10 @@ def update_level():
 @main.route('/create_riddle', methods=['GET','POST'])
 def create_riddle():
     form = RiddleForm()
-    if form.validate_on_submit():
-        riddle = form.riddle.data
-        answer = form.answer.data
-        level = int(form.level.data)
-        try:
-            new_riddle = Riddle(riddle=riddle,answer=answer,level=level)
-            db.session.add(new_riddle)
-            db.session.commit()
-            flash("L'énigme a été ajoutée avec succès !", "Success")
-            form.riddle.data = ''
-            form.answer.data = ''
-            form.level.data = 1
-        except BaseException as e:
-            flash("Echec de l'ajout de l'énigme en DB : "+str(e),"Danger")
-    else:
-        flash("Les données du formulaire ne sont pas valides !","Warning")
+    form.id.data = 0
     return render_template("main/create_riddle.html",form=form, action="Create")
 
-@main.route('/update_riddle', methods=['GET','POST'])
+@main.route('/update_riddle', methods=['GET'])
 def update_riddle():
     id = request.args.get('id')
     form = RiddleForm()
@@ -117,6 +102,36 @@ def update_riddle():
     except BaseException as e:
         flash("L'énigme n'a pu être trouvée en DB : "+str(e))
     return render_template("main/create_riddle.html", form=form, action="Update")
+
+@main.route('/save_riddle',methods=['POST'])
+def save_riddle():
+    form = RiddleForm()
+
+    id = int(form.id.data)
+    riddle = form.riddle.data
+    answer = form.answer.data
+    level = int(form.level.data)
+
+    if id != 0:
+        riddle_record = Riddle.query.filter_by(id=id).first()
+        message = "L'énigme a été modifiée !"
+        action = "Update"
+    else:
+        riddle_record = Riddle(riddle,answer,level)
+        message = "L'énigme a été créée !"
+        action = "Create"
+
+    if form.validate_on_submit():
+        riddle_record.riddle = riddle
+        riddle_record.answer = answer
+        riddle_record.level = level
+        db.session.add(riddle_record)
+        db.session.commit()
+        flash(message, 'Success')
+        return redirect(url_for('main.create_riddle')) #To avoid re-submitting a post request on 'Refresh page'.
+    else:
+        return render_template("main/create_riddle.html",form=form,action=action)
+
 
 @main.route('/delete_riddle', methods=['GET'])
 def delete_riddle():

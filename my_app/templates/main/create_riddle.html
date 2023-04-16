@@ -2,7 +2,7 @@
 {% extends "main.html" %}
 {% block body %}
 <h1>Créer vos énigmes :</h1>
-<form method="POST" action="{{ url_for('main.create_riddle') }}">
+<form method="POST" action="{{ url_for('main.save_riddle') }}">
     {{ form.csrf_token }}
     {{ form.id() }}
     <div class="form-group row" style="margin-bottom:10px">
