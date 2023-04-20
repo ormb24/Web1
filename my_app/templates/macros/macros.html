@@ -4,6 +4,39 @@
 <a href="/update?name={{ task.name }}&id={{ key }}" class="btn">Update</a>
 {% endmacro %}
 -->
+{% macro navigation(current_user) %}
+<nav class="navbar navbar-expand-md navbar-light bg-dark fixed-top">
+    <ul class="nav nav-pills">
+    {% if not current_user is none %} # current_user.is_authenticated
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.list_riddle') }}" style="color:red">List Riddles</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.create_riddle') }}" style="color:red">New Riddle</a>
+        </li>
+        {% if current_user.admin %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('auth.admin') }}">Users</a>
+            </li>
+        {% endif %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.infos') }}">Infos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{url_for('auth.login')}}">Log in</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{url_for('auth.register')}}">Sign up</a>
+        </li>
+    {% endif %}
+    </ul>
+</nav>
+{% endmacro %}
+
 {% macro flash() %}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -16,7 +49,7 @@
 
 {% macro pagination_widget(pagination, endpoint) %}
 <ul class="pagination">
-    <li{% if not pagination.has_prev %} class="disabled"{% endif %}>
+    <li {% if not pagination.has_prev %} class="disabled" {% endif %}>
         <a href="{% if pagination.has_prev %}{{ url_for(endpoint, page = pagination.page - 1, **kwargs) }}{% else %}#{% endif %}" class="page-link">
             Prev
         </a>
@@ -36,7 +69,7 @@
             <li class="disabled"><a href="#">&hellip;</a></li>
         {% endif %}
     {% endfor %}
-    <li{% if not pagination.has_next %} class="disabled"{% endif %}>
+    <li {% if not pagination.has_next %} class="disabled"{% endif %} >
         <a href="{% if pagination.has_next %}{{ url_for(endpoint,page = pagination.page + 1, **kwargs) }}{% else %}#{% endif %}" class="page-link">
             Next
         </a>

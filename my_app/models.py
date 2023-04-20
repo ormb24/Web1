@@ -9,24 +9,33 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 class User(UserMixin,db.Model):
-    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    password = db.Column(db.String(250), nullable=False)
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
+    blocked = db.Column(db.Boolean, nullable=False)
+    admin = db.Column(db.Boolean, nullable=False)
 
-    def __init__(self, username, email):
-        self.username = username
+    def __init__(self, email, password, firstname, lastname):
         self.email = email
-
+        self.password = password
+        self.firstname = firstname
+        self.lastname = lastname
+        self.blocked = False
+        self.admin = False
+    def __repr__(self):
+        return "<User %s>" % self.email
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __repr__(self):
-        return "username = %s, email = %s" % (self.username, self.email)
+    def get_id(self):
+        return self.id
+
+
 
 class Enigma(db.Model):
     __tablename__ = 'enigmas'
@@ -47,17 +56,19 @@ class Enigma(db.Model):
 
 
 class Riddle(db.Model):
-    __tablename__ = 'riddles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     riddle = db.Column(db.String(250), unique=True, nullable=False)
     answer = db.Column(db.String(100), nullable=False)
     level = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('riddles', lazy=True))
 
-    def __init__(self, riddle, answer, level):
+    def __init__(self, riddle, answer, level, user_id):
         self.riddle = riddle
         self.answer = answer
         self.level = level
+        self.user_id = user_id
     def __repr__(self):
-        rep = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
-        return rep
+        repr = "id : {}, riddle : {}, answer : {}, level : {}, uid : {}".format(self.id, self.riddle, self.answer, self.level, self.user_id)
+        return repr
 

@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+
+{% block body %}
+<h1>Register</h1>
+
+<form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+    {{ form.csrf_token }} <!-- form.hidden_tag() }} -->
+    <div class="form-row my-2">
+        {{ form.firstname.label }} {{ form.firstname(size=30, class='form-control') }}
+    </div>
+    <div class="form-row my-2">
+        {{ form.lastname.label }} {{ form.lastname(size=30, class='form-control') }}
+    </div>
+    <div class="form-row my-2">
+        {{ form.email.label }} {{ form.email(size=20, class='form-control') }}
+    </div>
+    <div class="form-row my-2">
+        {{ form.password.label }} {{ form.password(size=20, class='form-control') }}
+    </div>
+    <div class="form-row my-3">
+        {{ form.submit(class='btn btn-primary') }}
+    </div>
+</form>
+<a href="{{ url_for('auth.login') }}">Already have an account ?</a>
+
+{% endblock %}

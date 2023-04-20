@@ -1,19 +1,13 @@
-{% import "macros/macros.html" as macro %}
 {% extends "main.html" %}
-{{ macro.flash() }}
 
 {% block body %}
-<h1>Login page :</h1>
+<h1>Login :</h1>
 <form method="POST" action="/login" novalidate>
     {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->
 
-    <!-- {% if form.errors %} {% for message in form.password.errors %} {{ message }} {% endfor %} {% endif %} !-->
-
-    {{ form.email.label(class='login_label') }} {{ form.email(size=40) }} <br>
+    {{ form.email.label(class='login_label') }} {{ form.email(size=60) }} <br>
     {{ form.password.label(class='login_label') }} {{ form.password(size=20) }} <br>
     {{ form.submit }}
 </form>
-{% endblock %}
-{%block footer %}
-    {{ macro.flash() }}
+<a href="{{ url_for('auth.register') }}">Not registered yet ?</a>
 {% endblock %}

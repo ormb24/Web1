@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from config import config
@@ -24,3 +24,14 @@ def create_app(config_name):
 
 from my_app.main import views
 
+""" ********************
+    FUNCTIONS
+    ********************
+"""
+
+"""
+@login_manager.user_loader
+# callback to reload the user object from database, given its id !
+def load_user():
+    return User.query.get(int(userid))
+"""

@@ -19,7 +19,7 @@ def validate_riddle(form,field):
     strField = field.data #because StringField, TextField,... are not iterable; get their content first !
     for word in not_accepted_words:
         if word in strField:
-            form.riddle.errors.append("Le mot \'{}\' n'est pas autorisé !".format(word) )
+            form.riddle.errors.append("Le mot \'{}\' n'est pas autorisé !".format(word))
 
 # Vérifie si la valeur du champ n'est pas déjà présente en DB
 def isUnique_riddle(form, field):

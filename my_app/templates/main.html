@@ -1,3 +1,4 @@
+{% import "macros/macros.html" as macro %}
 <html>
     <head>
         <title>Vicious Clues</title>
@@ -6,27 +7,9 @@
         <link href="/static/css/my.css" rel="stylesheet">
     </head>
     <body>
-        <nav class="navbar navbar-expand-md navbar-light bg-dark fixed-top">
-            <ul class="nav nav-pills">
-                <li class="nav-item">
-                    {% if current_user.is_authenticated %}
-                        <a class="nav-link" href="/logout" style="color:red">Log Out</a>
-                    {% else %}
-                        <a class="nav-link" href="/login" style="color:red">Log In</a>
-                    {% endif %}
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/liste">Liste des énigmes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/kamoulox">Créer une énigme</a>
-                </li>
-                 <li class="nav-item">
-                    <a class="nav-link" href="/infos">Infos</a>
-                </li>
-
-            </ul>
-        </nav>
+        {% block navigation %}
+            {{ macro.navigation(current_user) }}
+        {% endblock %}
 
         <div class="container" style="margin-top: 60px">
             <!-- Error messages in forms -->

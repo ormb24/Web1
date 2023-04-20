@@ -1,8 +1,8 @@
-from flask import render_template, session, redirect, url_for, request, flash
+from flask import render_template, session, redirect, url_for, request, flash, abort
 
 import my_app
 from . import main
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from .forms import CreateEnigmaForm, RiddleForm
 from .. import db
 from ..models import Enigma, Riddle
@@ -25,15 +25,6 @@ def list_enigmas():
     ##enigmas = Enigma.query.all()
     #return 'Liste des énigmes'
     ##return render_template('main/list_enigma.html', enigmas=enigmas)
-
-@main.route('/list_riddle', methods=['GET','POST'])
-#@login_required
-def list_riddles():
-    #page = request.args.get('page', 1, type=int)
-    #pagination = Enigma.query.order_by(Enigma.id.asc()).paginate(page=page, per_page=5)
-    #enigmas = pagination.items
-    riddles = Riddle.query.order_by(Riddle.id.asc())
-    return render_template('main/list_riddle.html', riddles=riddles)
 
 @main.route('/kamoulox', methods=['GET','POST'])
 @login_required
@@ -82,29 +73,68 @@ def update_level():
     db.session.commit()
     return list_enigmas()
 
+""" ********************
+    Controller : Riddles
+    ********************
+"""
+@main.route('/list_riddle', methods=['GET','POST'])
+@login_required
+def list_riddle():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    req_id = request.args.get('id')
+
+    if req_id:
+        if (int(req_id) != int(current_user.id) and not current_user.admin):
+            abort(403)
+        user_id = req_id
+    else:
+        user_id = current_user.id
+
+    riddles = Riddle.query.order_by(Riddle.user_id == user_id)
+    return render_template('main/list_riddle.html', riddles=riddles, user_id=int(user_id), current_user=current_user)
 
 @main.route('/create_riddle', methods=['GET','POST'])
+@login_required
 def create_riddle():
     form = RiddleForm()
     form.id.data = 0
-    return render_template("main/create_riddle.html",form=form, action="Create")
+    return render_template("main/create_riddle.html",form=form, current_user=current_user, action="Create")
 
 @main.route('/update_riddle', methods=['GET'])
+@login_required
 def update_riddle():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
     id = request.args.get('id')
+    riddle = Riddle.query.filter_by(id=id).first()
+
+    if not (current_user.admin) and not (riddle.user_id == current_user.id):
+        abort(403)
+
     form = RiddleForm()
-    try:
-        riddle = Riddle.query.filter_by(id=id).first()
-        form.id.data = riddle.id
-        form.riddle.data = riddle.riddle
-        form.answer.data = riddle.answer
-        form.level.data = riddle.level
-    except BaseException as e:
-        flash("L'énigme n'a pu être trouvée en DB : "+str(e))
-    return render_template("main/create_riddle.html", form=form, action="Update")
+
+    form.id.data = riddle.id
+    form.riddle.data = riddle.riddle
+    form.answer.data = riddle.answer
+    form.level.data = riddle.level
+
+    return render_template("main/create_riddle.html", form=form, current_user=current_user, action="Update")
 
 @main.route('/save_riddle',methods=['POST'])
+@login_required
 def save_riddle():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
     form = RiddleForm()
 
     id = int(form.id.data)
@@ -114,10 +144,11 @@ def save_riddle():
 
     if id != 0:
         riddle_record = Riddle.query.filter_by(id=id).first()
+        user_id = riddle_record.user_id
         message = "L'énigme a été modifiée !"
         action = "Update"
     else:
-        riddle_record = Riddle(riddle,answer,level)
+        riddle_record = Riddle(riddle,answer,level,current_user.id)
         message = "L'énigme a été créée !"
         action = "Create"
 
@@ -130,21 +161,29 @@ def save_riddle():
         flash(message, 'Success')
         return redirect(url_for('main.create_riddle')) #To avoid re-submitting a post request on 'Refresh page'.
     else:
-        return render_template("main/create_riddle.html",form=form,action=action)
+        return render_template("main/create_riddle.html",form=form, current_user=current_user, action=action)
 
 
 @main.route('/delete_riddle', methods=['GET'])
 def delete_riddle():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
     id = request.args.get('id')
+    user_id = request.args.get('user_id')
+    riddle = Riddle.query.filter_by(id=id).first()
+
+    if not (current_user.admin) and not (riddle.user_id == current_user.id):
+        abort(403)
+
     try:
-        riddle = Riddle.query.filter_by(id=id).first()
         db.session.delete(riddle)
         db.session.commit()
     except BaseException as e:
         flash("L'énigme n'a pas été supprimée : "+ str(e))
-    return list_riddles()
 
-@main.route('/bootstrap')
-def bootstrap():
-    return render_template('main/bootstrap_test.html')
+    return redirect('/?id='+str(user_id), code=302)
+
 
