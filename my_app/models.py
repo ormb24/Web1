@@ -73,4 +73,5 @@ class Riddle(db.Model):
     def __repr__(self):
         repr = "id : {}, riddle : {}, answer : {}, level : {}, uid : {}".format(self.id, self.riddle, self.answer, self.level, self.user_id)
         return repr
-
+    def set_level(self,level):
+        self.level = level

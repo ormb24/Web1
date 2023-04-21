@@ -1,4 +1,3 @@
-{% import "macros/macros.html" as macro %}
 {% extends "main.html" %}
 {% block body %}
 
@@ -15,12 +14,12 @@
         <div class="enigma-level" >{{ enigma.level }}</div>
         <div>
             <a href="/level?id={{ enigma.id }}&direction=up">
-                <img src="/static/img/file-arrow-up-fill.svg" style="min-height:100%;margin-right:10px" >
+                <img src="/static/img/file-arrow-up-fill.svg"  >
             </a>
         </div>
         <div>
-            <a href="/level?id={{ enigma.id }}&direction=down">
-                <img src="/static/img/file-arrow-down-fill.svg" style="min-height:100%" >
+            <a href="/level?id={{ enigma.id }}&direction=down" >
+                <img src="/static/img/file-arrow-down-fill.svg"  >
             </a>
         </div>
 

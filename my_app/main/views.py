@@ -60,19 +60,7 @@ def create_enigmas():
             flash("L\'ajout de l\'enigme a échoué !")
             #return render_template('main/create_enigma.html', form=form)
     return render_template('main/create_enigma.html', form=form)
-@main.route('/level', methods=['GET'])
-@login_required
-def update_level():
-    id = request.args.get("id")
-    enigma = Enigma.query.filter_by(id=id).first()
-    if request.args.get("direction") == 'up':
-        enigma.set_level(enigma.level +1)
-    elif enigma.level > 0:
-         enigma.set_level(enigma.level -1)
-    else:
-        flash("Le niveau ne peut être inférieur à 0 !")
-    db.session.commit()
-    return list_enigmas()
+
 
 """ ********************
     Controller : Riddles
@@ -81,17 +69,21 @@ def update_level():
 @main.route('/list_riddle', methods=['GET','POST'])
 @login_required
 def list_riddle():
+    page = request.args.get('page', 1, type=int)
     if current_user.blocked:
         flash('Your account has been blocked by an administrator.', 'Danger')
         logout_user()
         return redirect(url_for('auth.login'))
     flash(current_user.lastname, "Success")
     if current_user.admin:
-        riddles = Riddle.query.all()
+        #riddles = Riddle.query.all()
+        pagination = db.paginate(db.select(Riddle).order_by(Riddle.id.asc()), per_page=5)
     else:
-        riddles = Riddle.query.filter_by(user_id=current_user.id).all()
+        #riddles = Riddle.query.filter_by(user_id=current_user.id).all()
+        pagination = db.paginate(db.select(Riddle).filter_by(user_id=current_user.id).order_by(Riddle.id.asc()), per_page=5)
 
-    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user)
+    riddles = pagination.items
+    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
 
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
@@ -183,7 +175,20 @@ def delete_riddle():
 
     return redirect('/?id='+str(user_id), code=302)
 
+@main.route('/level', methods=['GET'])
+@login_required
+def update_level():
+    id = request.args.get("id")
+    riddle = Riddle.query.filter_by(id=id).first()
 
+    if request.args.get("direction") == 'up':
+        riddle.set_level(riddle.level + 1)
+    elif riddle.level > 0:
+        riddle.set_level(riddle.level - 1)
+    else:
+        flash("Le niveau ne peut être inférieur à 0 !")
+    db.session.commit()
+    return list_riddle()
 
 
 

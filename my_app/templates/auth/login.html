@@ -1,13 +1,17 @@
 {% extends "main.html" %}
-
 {% block body %}
 <h1>Login :</h1>
-<form method="POST" action="/login" novalidate>
+<form method="POST" action="{{ url_for('auth.login') }}" novalidate>
     {{ form.csrf_token }} <!-- {{ form.hidden_tag() }} -->
-
-    {{ form.email.label(class='login_label') }} {{ form.email(size=60) }} <br>
-    {{ form.password.label(class='login_label') }} {{ form.password(size=20) }} <br>
+    <div class="form-row my-2">
+    {{ form.email.label }} {{ form.email(size=20, class='form-control ') }}
+    </div>
+    <div class="form-row my-2">
+    {{ form.password.label }} {{ form.password(size=20, class='form-control') }}
+    </div>
+    <div class="form-row my-3">
     {{ form.submit }}
+    </div>
 </form>
 <a href="{{ url_for('auth.register') }}">Not registered yet ?</a>
 {% endblock %}

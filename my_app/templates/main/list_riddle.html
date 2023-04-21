@@ -1,35 +1,47 @@
-{% import "macros/macros.html" as macro %}
 {% extends "main.html" %}
 {% block body %}
 
 <h1>Liste des énigmes</h1>
-<div class="list-group">
+<div class="list-group" >
 {% for riddle in riddles %}
-    <div class="row">
-        <div class="col-9">
+    <div class="row" style="padding-bottom:5px">
+        <div class="col-8" >
             {% if riddle.hidden == True %}
                 <a href="/riddle_show?id={{ riddle.id }}" class="list-group-item list-group-item-action">{{ riddle.riddle }}</a>
             {% else %}
                 <a href="/riddle_hide?id={{ riddle.id }}" class="list-group-item list-group-item-action">
-                    {{ riddle.riddle}}<br/>
-                    {{ riddle.answer}}
+                    {{ riddle.riddle}}
                 </a>
             {% endif %}
         </div>
-        <div class="col-1">
-            {{ riddle.level }}
+        <div class="col-2 btn" style="display:flex">
+            <button onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button>
+            <div style="border:solid;padding:0 5 0 5">{{ riddle.level }}</div>
+            <div>
+                <a href="/level?id={{ riddle.id }}&direction=up" class="riddle_btn">
+                    <img src="/static/img/file-arrow-up-fill.svg" style="min-height:100%" >
+                </a>
+            </div>
+            <div>
+                <a href="/level?id={{ riddle.id }}&direction=down">
+                    <img src="/static/img/file-arrow-down-fill.svg" style="min-height:100%" >
+                </a>
+            </div>
         </div>
-        <div class="col-2">
+        <div class="col-2" style="display:flex">
             <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a>
-            <a href="update_riddle?id={{riddle.id}}" class="btn btn-info">Edit</a>
+            <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning">Edit</a>
             {% if current_user.admin %}
-            <a href="#" data-toggle="tooltip" title="{{riddle.user}}">View</a>
+            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">Owner</a>
             {% endif %}
         </div>
     </div>
+    <div class="riddle-answer" style="clear:left;display:none" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
 {% endfor %}
 </div>
 {% endblock %}
 {% block footer %}
-
+<div class="pagination">
+    {{ macro.pagination_widget(pagination, 'main.list_riddle') }}
+</div>
 {% endblock %}
