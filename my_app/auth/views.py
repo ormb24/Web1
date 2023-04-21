@@ -50,15 +50,15 @@ def login():
 
         if not user:
             flash("This email address doesn\'t exist !", "Danger")
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
 
         if not check_password_hash(user.password, form.password.data):
             flash("The password is incorrect", "Danger")
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
 
         if user.blocked:
             flash("Your account has been blocked by an administrator.", "Danger")
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
 
         login_user(user, remember=True)
         return redirect(url_for('main.list_riddle'))

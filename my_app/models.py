@@ -25,7 +25,8 @@ class User(UserMixin,db.Model):
         self.blocked = False
         self.admin = False
     def __repr__(self):
-        return "<User %s>" % self.email
+        rep = "User : {}, {}\nEmail : {}".format(self.lastname, self.firstname, self.email)
+        return rep
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -61,6 +62,7 @@ class Riddle(db.Model):
     answer = db.Column(db.String(100), nullable=False)
     level = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    #user = db.relationship('User', backref=db.backref('riddle'))
     user = db.relationship('User', backref=db.backref('riddles', lazy=True))
 
     def __init__(self, riddle, answer, level, user_id):

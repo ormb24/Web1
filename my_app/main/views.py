@@ -5,12 +5,13 @@ from . import main
 from flask_login import login_required, current_user, logout_user
 from .forms import CreateEnigmaForm, RiddleForm
 from .. import db
-from ..models import Enigma, Riddle
+from ..models import Enigma, Riddle, User
 
 @main.route('/')
+@login_required
 def index():
-    return infos()
-
+    #return infos()
+    return list_riddle()
 @main.route('/infos')
 def infos():
     return render_template('main/infos.html')
@@ -84,18 +85,13 @@ def list_riddle():
         flash('Your account has been blocked by an administrator.', 'Danger')
         logout_user()
         return redirect(url_for('auth.login'))
-
-    req_id = request.args.get('id')
-
-    if req_id:
-        if (int(req_id) != int(current_user.id) and not current_user.admin):
-            abort(403)
-        user_id = req_id
+    flash(current_user.lastname, "Success")
+    if current_user.admin:
+        riddles = Riddle.query.all()
     else:
-        user_id = current_user.id
+        riddles = Riddle.query.filter_by(user_id=current_user.id).all()
 
-    riddles = Riddle.query.order_by(Riddle.user_id == user_id)
-    return render_template('main/list_riddle.html', riddles=riddles, user_id=int(user_id), current_user=current_user)
+    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user)
 
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
@@ -165,6 +161,7 @@ def save_riddle():
 
 
 @main.route('/delete_riddle', methods=['GET'])
+@login_required
 def delete_riddle():
     if current_user.blocked:
         flash('Your account has been blocked by an administrator.', 'Danger')
@@ -185,5 +182,10 @@ def delete_riddle():
         flash("L'énigme n'a pas été supprimée : "+ str(e))
 
     return redirect('/?id='+str(user_id), code=302)
+
+
+
+
+
 
 

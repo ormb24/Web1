@@ -22,6 +22,9 @@
         <div class="col-2">
             <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a>
             <a href="update_riddle?id={{riddle.id}}" class="btn btn-info">Edit</a>
+            {% if current_user.admin %}
+            <a href="#" data-toggle="tooltip" title="{{riddle.user}}">View</a>
+            {% endif %}
         </div>
     </div>
 {% endfor %}
