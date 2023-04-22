@@ -31,6 +31,7 @@
         <div class="col-2" style="display:flex">
             <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a>
             <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning">Edit</a>
+            <a href="/clue?riddle_id={{riddle.id}}" class="btn btn-warning">Clue</a>
             {% if current_user.admin %}
             <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">Owner</a>
             {% endif %}

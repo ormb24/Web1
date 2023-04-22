@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block body %}
+<h1>Gérez vos indices :</h1>
+<form method="POST" action="{{ url_for('main.save_clue') }}">
+    {{ form.csrf_token }}
+    {{ form.id() }}
+    {{ form.riddle_id() }}
+    <div class="form-group row" style="margin-bottom:10px">
+        {{ form.riddle.label(class="col-sm-1 col-form-label") }}
+        <div class="col-sm-8">
+            {{ form.riddle(type="text",class="form-control") }}
+        </div>
+    </div>
+    <div class="form-group row" style="margin-bottom:10px">
+        {{ form.clue.label(class="col-sm-1 col-form-label") }}
+        <div class="col-sm-8">
+            {{ form.clue(type="text",class="form-control",placeholder="Encodez votre indice ici...") }}
+        </div>
+    </div>
+    {{ form.submit(class="btn btn-primary", value="Create") }}
+</form>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}

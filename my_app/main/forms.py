@@ -27,7 +27,7 @@ def isUnique_riddle(form, field):
         form.riddle.errors.append("L'énigme existe déjà en DB !")
 
 
-class RiddleForm( FlaskForm):
+class RiddleForm( FlaskForm ):
     id = HiddenField("riddle_id")
     riddle = StringField("Enigme : ",
                            validators=[DataRequired(message="Le champ ne peut être vide !"),
@@ -41,4 +41,12 @@ class RiddleForm( FlaskForm):
                          validators=[DataRequired(message="Veuillez entrer une valeur !"),
                                      NumberRange(min=0, max=10, message="Le niveau de difficulté doit être compris entre %(min)d et %(max)d !")
                                                         ])
+    submit = SubmitField("Ajouter")
+
+class ClueForm( FlaskForm ):
+    id = HiddenField("clue_id")
+    clue = StringField("Clue : ",
+                       validators=[Length(max=100, message="L\'indice ne peut comporter plus de %(max)d caractères !")])
+    riddle = StringField("Enigme :", render_kw={'readonly': True})
+    riddle_id = HiddenField("riddle_id")
     submit = SubmitField("Ajouter")

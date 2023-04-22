@@ -1,6 +1,5 @@
 from my_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 from my_app import login_manager
 from flask_login import UserMixin
 
@@ -75,3 +74,18 @@ class Riddle(db.Model):
         return repr
     def set_level(self,level):
         self.level = level
+
+
+class Clue(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clue = db.Column(db.String(100))
+    riddle_id = db.Column(db.Integer, db.ForeignKey('riddle.id'), nullable=False)
+    riddle = db.relationship('Riddle', backref=db.backref('riddles', lazy=True))
+
+    def __init__(self,clue,riddle_id):
+        self.clue = clue
+        self.riddle_id = riddle_id
+
+    def __repr__(self):
+        repr = "id : {}, clue : {}, riddle_id : {}".format(self.id,self.clue,self.riddle_id)
+        return repr

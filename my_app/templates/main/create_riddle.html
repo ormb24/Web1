@@ -16,6 +16,7 @@
              {{ form.answer(type="text",class="form-control",placeholder="Encodez sa réponse ici...") }}
         </div>
     </div>
+    {% block clue %} {% endblock %}
     <div class="form-group row" style="margin-bottom:10px">
         {{ form.level.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-2">

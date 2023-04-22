@@ -1,11 +1,10 @@
-from flask import render_template, session, redirect, url_for, request, flash, abort
+from flask import render_template, redirect, url_for, request, flash, abort
 
-import my_app
 from . import main
 from flask_login import login_required, current_user, logout_user
-from .forms import CreateEnigmaForm, RiddleForm
+from .forms import CreateEnigmaForm, RiddleForm, ClueForm
 from .. import db
-from ..models import Enigma, Riddle, User
+from ..models import Enigma, Riddle, Clue
 
 @main.route('/')
 @login_required
@@ -74,7 +73,7 @@ def list_riddle():
         flash('Your account has been blocked by an administrator.', 'Danger')
         logout_user()
         return redirect(url_for('auth.login'))
-    flash(current_user.lastname, "Success")
+
     if current_user.admin:
         #riddles = Riddle.query.all()
         pagination = db.paginate(db.select(Riddle).order_by(Riddle.id.asc()), per_page=5)
@@ -190,7 +189,65 @@ def update_level():
     db.session.commit()
     return list_riddle()
 
+@main.route('/clue', methods=['GET'])
+@login_required
+def clue():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
 
+    riddle_id = request.args.get('riddle_id')
+    clue = Clue.query.filter_by(riddle_id=riddle_id).first()
+    form = ClueForm()
 
+    if clue:
+        template = "main/create_clue.html"
+        form.id.data = clue.id
+        form.clue.data = clue.clue
+        form.riddle.data = clue.riddle.riddle
+        form.riddle_id.data = riddle_id
+    else:
+        template = "main/create_clue.html"
+        form.id.data = 0
+        form.clue.data= ""
+        riddle = Riddle.query.filter_by(id=riddle_id).first()
+        form.riddle.data = riddle.riddle
+        form.riddle_id.data = riddle_id
 
+    if not (current_user.admin) and not (riddle.user_id == current_user.id):
+        abort(403)
+
+    return render_template(template, form=form)
+
+@main.route('/save_clue',methods=['POST'])
+@login_required
+def save_clue():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    form = ClueForm()
+
+    id = int(form.id.data)
+    riddle_id=int(form.riddle_id.data)
+    clue = form.clue.data
+
+    if id != 0:
+        clue_record = Clue.query.filter_by(id=id).first()
+        message = "L'énigme a été modifiée !"
+    else:
+        clue_record = Clue(clue,riddle_id)
+        message = "L'énigme a été créée !"
+
+    if form.validate_on_submit():
+        clue_record.clue = clue
+        clue_record.riddle_id = riddle_id
+        db.session.add(clue_record)
+        db.session.commit()
+        flash(message, 'Success')
+        return redirect(url_for('main.list_riddle')) #To avoid re-submitting a post request on 'Refresh page'.
+    else:
+        return render_template("main/create_clue.html",form=form)
 
