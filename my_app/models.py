@@ -65,7 +65,7 @@ class Clue(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     clue = db.Column(db.String(100))
     riddle_id = db.Column(db.Integer, db.ForeignKey('riddle.id'), nullable=False)
-    riddle = db.relationship('Riddle', backref=db.backref('riddles', lazy=True))
+    riddle = db.relationship('Riddle', backref=db.backref('riddles', lazy=True), cascade="delete,merge,save-update")
 
     def __init__(self,clue,riddle_id):
         self.clue = clue

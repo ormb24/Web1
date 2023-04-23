@@ -70,3 +70,4 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('auth.login'))
+

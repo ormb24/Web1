@@ -1,0 +1,9 @@
+{% extends "main.html" %}
+{% block title %}
+  Page not found
+{% endblock %}
+
+{% block body %}
+  <h1>Page not found</h1>
+  <p>Click here to access the main page : <a href="{{ url_for('main.index') }}">Vicious clues</a></p>
+{% endblock %}

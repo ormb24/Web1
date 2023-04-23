@@ -24,6 +24,7 @@ def create_app(config_name):
 
 from my_app.main import views
 
+
 """ ********************
     FUNCTIONS
     ********************

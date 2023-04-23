@@ -20,9 +20,9 @@ def infos():
 def list():
     return list_riddle()
 
-""" ********************
-    Controller : Riddles
-    ********************
+""" *******************
+    Controller : Riddle
+    *******************
 """
 @main.route('/list_riddle', methods=['GET','POST'])
 @login_required
@@ -90,13 +90,16 @@ def save_riddle():
 
     if id != 0:
         riddle_record = Riddle.query.filter_by(id=id).first()
-        user_id = riddle_record.user_id
-        message = "L'énigme a été modifiée !"
         action = "Update"
+        message="L'énigme a été modifiée !"
     else:
-        riddle_record = Riddle(riddle,answer,level,current_user.id)
-        message = "L'énigme a été créée !"
+        riddles = Riddle.query.filter_by(riddle=riddle).first()
         action = "Create"
+        if riddles:
+            flash("L\'énigme existe déjà en DB !","Danger")
+        else:
+            riddle_record = Riddle(riddle,answer,level,current_user.id)
+            message = "L'énigme a été créée !"
 
     if form.validate_on_submit():
         riddle_record.riddle = riddle
@@ -119,35 +122,49 @@ def delete_riddle():
         return redirect(url_for('auth.login'))
 
     id = request.args.get('id')
-    user_id = request.args.get('user_id')
+    #user_id = request.args.get('user_id')
+    clue = Clue.query.filter_by(riddle_id=id).first()
     riddle = Riddle.query.filter_by(id=id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
         abort(403)
 
     try:
+        if clue:    #on supprime l'indice lié avant de supprimer l'énigme
+            db.session.delete(clue)
         db.session.delete(riddle)
         db.session.commit()
     except BaseException as e:
-        flash("L'énigme n'a pas été supprimée : "+ str(e))
+        flash("L'énigme n'a pas été supprimée : "+ str(e),"Warning")
 
-    return redirect('/?id='+str(user_id), code=302)
+    return list_riddle()
+    #return redirect('/?id='+str(user_id), code=302)
 
 @main.route('/level', methods=['GET'])
 @login_required
 def update_level():
     id = request.args.get("id")
+
     riddle = Riddle.query.filter_by(id=id).first()
 
-    if request.args.get("direction") == 'up':
-        riddle.set_level(riddle.level + 1)
-    elif riddle.level > 0:
-        riddle.set_level(riddle.level - 1)
+    if (request.args.get("direction") == 'up'):
+        if (riddle.level<10):
+            riddle.set_level(riddle.level + 1)
+        else:
+            flash("Le niveau ne peut être supérieur à 10 !","Warning")
     else:
-        flash("Le niveau ne peut être inférieur à 0 !")
+        if (riddle.level > 0):
+            riddle.set_level(riddle.level - 1)
+        else:
+            flash("Le niveau ne peut être inférieur à 0 !","Warning")
+
     db.session.commit()
     return list_riddle()
 
+""" ********************
+    Controller : Clue
+    ********************
+"""
 @main.route('/clue', methods=['GET'])
 @login_required
 def clue():
@@ -158,6 +175,7 @@ def clue():
 
     riddle_id = request.args.get('riddle_id')
     clue = Clue.query.filter_by(riddle_id=riddle_id).first()
+    riddle = Riddle.query.filter_by(id=riddle_id).first()
     form = ClueForm()
 
     if clue:
@@ -170,7 +188,6 @@ def clue():
         template = "main/create_clue.html"
         form.id.data = 0
         form.clue.data= ""
-        riddle = Riddle.query.filter_by(id=riddle_id).first()
         form.riddle.data = riddle.riddle
         form.riddle_id.data = riddle_id
 
@@ -195,10 +212,10 @@ def save_clue():
 
     if id != 0:
         clue_record = Clue.query.filter_by(id=id).first()
-        message = "L'énigme a été modifiée !"
+        message = "L'indice a été modifié !"
     else:
         clue_record = Clue(clue,riddle_id)
-        message = "L'énigme a été créée !"
+        message = "L'indice a été créé !"
 
     if form.validate_on_submit():
         clue_record.clue = clue
@@ -210,3 +227,14 @@ def save_clue():
     else:
         return render_template("main/create_clue.html",form=form)
 
+""" ********************
+    Controller : Error Pages
+    ********************
+"""
+@main.app_errorhandler(404)
+def page_not_found(e):
+     return render_template("errors/404.html"), 404
+
+@main.app_errorhandler(500)
+def internal_server_error(e):
+    return render_template("errors/500.html"), 500
