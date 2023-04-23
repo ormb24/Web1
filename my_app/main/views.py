@@ -202,7 +202,7 @@ def clue():
     form = ClueForm()
 
     if clue:
-        template = "main/create_clue.html"
+        template = "main/update_clue.html"
         form.id.data = clue.id
         form.clue.data = clue.clue
         form.riddle.data = clue.riddle.riddle
