@@ -16,6 +16,7 @@ class RegisterForm( FlaskForm ):
      password = PasswordField('Password : ', validators=[Length(min=8, max=30)])
      firstname = StringField('First name : ', validators=[InputRequired(), Length(min=2, max=30)])
      lastname = StringField('Last name : ', validators=[InputRequired(), Length(min=2, max=30)])
+     username = StringField('Username : ', validators=[InputRequired(), Length(min=2, max=10)])
      submit = SubmitField('Register')
 
 

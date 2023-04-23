@@ -1,10 +1,10 @@
 from flask import render_template, redirect, url_for, request, flash, abort
-
-from . import main
 from flask_login import login_required, current_user, logout_user
-from .forms import CreateEnigmaForm, RiddleForm, ClueForm
-from .. import db
-from ..models import Enigma, Riddle, Clue
+
+#from my_app import main
+from my_app.main.forms import RiddleForm, ClueForm
+from my_app import db
+from my_app.models import Riddle, Clue
 
 @main.route('/')
 @login_required
@@ -17,49 +17,8 @@ def infos():
 
 @main.route('/liste', methods=['GET','POST'])
 @login_required
-def list_enigmas():
-    page = request.args.get('page',1,type=int)
-    pagination = Enigma.query.order_by(Enigma.id.asc()).paginate(page=page,per_page=5)
-    enigmas = pagination.items
-    return render_template('main/list_enigma.html',enigmas=enigmas, pagination=pagination)
-    ##enigmas = Enigma.query.all()
-    #return 'Liste des énigmes'
-    ##return render_template('main/list_enigma.html', enigmas=enigmas)
-
-@main.route('/kamoulox', methods=['GET','POST'])
-@login_required
-def create_enigmas():
-    #if request.method == "GET":
-    #    session['next'] = request.args.get('next')
-
-    isError=False
-    form = CreateEnigmaForm()
-
-    if request.method == "POST":
-        if form.validate_on_submit():
-            #return "Enigme : {}; Reponse : {}, Level : {}".format(enigma,response,level)
-            try:
-                enigma=Enigma(form.enigma.data, form.response.data, int(form.level.data))
-                db.session.add(enigma)
-                db.session.commit()
-            except BaseException as e:
-                isError=True
-                flash('Un problème est survenu lors de l\'insertion dans la base de données : '+str(e))
-
-            #next = session.get('next')
-            #if next is None or not next.startswith('/'):
-            #    next = url_for('main.index')
-            #return redirect(next)
-        else:
-            isError=True
-
-        if not isError:
-            flash('Enigme ajoutée avec succès')
-        else:
-            flash("L\'ajout de l\'enigme a échoué !")
-            #return render_template('main/create_enigma.html', form=form)
-    return render_template('main/create_enigma.html', form=form)
-
+def list():
+    return list_riddle()
 
 """ ********************
     Controller : Riddles

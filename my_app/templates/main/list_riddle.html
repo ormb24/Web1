@@ -2,45 +2,58 @@
 {% block body %}
 
 <h1>Liste des énigmes</h1>
-<div class="list-group" >
-{% for riddle in riddles %}
-    <div class="row" style="padding-bottom:5px">
-        <div class="col-8" >
-            {% if riddle.hidden == True %}
-                <a href="/riddle_show?id={{ riddle.id }}" class="list-group-item list-group-item-action">{{ riddle.riddle }}</a>
-            {% else %}
-                <a href="/riddle_hide?id={{ riddle.id }}" class="list-group-item list-group-item-action">
-                    {{ riddle.riddle}}
-                </a>
-            {% endif %}
-        </div>
-        <div class="col-2 btn" style="display:flex">
-            <button onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button>
-            <div style="border:solid;padding:0 5 0 5">{{ riddle.level }}</div>
-            <div>
-                <a href="/level?id={{ riddle.id }}&direction=up" class="riddle_btn">
-                    <img src="/static/img/file-arrow-up-fill.svg" style="min-height:100%" >
-                </a>
-            </div>
-            <div>
-                <a href="/level?id={{ riddle.id }}&direction=down">
-                    <img src="/static/img/file-arrow-down-fill.svg" style="min-height:100%" >
-                </a>
-            </div>
-        </div>
-        <div class="col-2" style="display:flex">
-            <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a>
-            <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning">Edit</a>
-            <a href="/clue?riddle_id={{riddle.id}}" class="btn btn-warning">Clue</a>
+
+<table class="table table-bordered table-responsive">
+    <thead class="thead-dark">
+        <tr>
+            <th>Enigme</th>
+            <th>Reponse</th>
+            <th>Indice</th>
+            <th style="padding-left:30; padding-right:30" >Niveau</th>
+            <th>Modifier</th>
+            <th>Supprimer</th>
             {% if current_user.admin %}
-            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">Owner</a>
+            <th>Propriétaire</th>
             {% endif %}
-        </div>
-    </div>
-    <div class="riddle-answer" style="clear:left;display:none" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
-{% endfor %}
-</div>
+        </tr>
+    </thead>
+    <tbody>
+    {% for riddle in riddles %}
+
+    <tr>
+        <td>
+            {{ riddle.riddle }}
+            <div class="riddle-answer" style="clear:left;display:none;background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
+        </td>
+        <td class="col-fit"><button onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button></td>
+        <td class="col-fit"><a href="/clue?riddle_id={{riddle.id}}"><button><img src="/static/img/search.svg"</button></a></td>
+        <td class="col-fit">
+
+                <div style="border:solid;padding:0 5 0 5; float:left">{{ riddle.level }}</div>
+                <div style="float:left" >
+                    <a href="/level?id={{ riddle.id }}&direction=up">
+                        <img src="/static/img/file-arrow-up-fill.svg" style="width:30px" >
+                    </a>
+                </div>
+                <div style="float:left">
+                    <a href="/level?id={{ riddle.id }}&direction=down">
+                        <img src="/static/img/file-arrow-down-fill.svg" style="width:30px" >
+                    </a>
+                </div>
+
+        </td>
+        <td class="col-fit"><a href="update_riddle?id={{riddle.id}}" class="btn btn-warning">Edit</a></td>
+        <td class="col-fit"><a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a></td>
+
+        {% if current_user.admin %}
+        <td class="col-fit"><a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a></td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
+
 {% block footer %}
 <div class="pagination">
     {{ macro.pagination_widget(pagination, 'main.list_riddle') }}

@@ -10,17 +10,20 @@ def load_user(user_id):
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(10), unique=True, nullable=False)
     password = db.Column(db.String(250), nullable=False)
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
+
     blocked = db.Column(db.Boolean, nullable=False)
     admin = db.Column(db.Boolean, nullable=False)
 
-    def __init__(self, email, password, firstname, lastname):
+    def __init__(self, email, password, firstname, lastname, username):
         self.email = email
         self.password = password
         self.firstname = firstname
         self.lastname = lastname
+        self.username = username
         self.blocked = False
         self.admin = False
     def __repr__(self):
@@ -31,28 +34,10 @@ class User(UserMixin,db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
+    def get_username(self):
+        return self.username
     def get_id(self):
         return self.id
-
-
-
-class Enigma(db.Model):
-    __tablename__ = 'enigmas'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    enigma = db.Column(db.String(250), unique=True, nullable=False)
-    response = db.Column(db.String(100), unique=True, nullable=False)
-    level = db.Column(db.Integer, nullable=False)
-
-    def __init__(self, enigma, response, level):
-        self.enigma = enigma
-        self.response = response
-        self.level = level
-    def set_level(self,level):
-        self.level = level
-
-    def __repr__(self):
-        return "Enigma = %s; Solution = %s; Level = %i" % (self.enigma,self.response, self.level)
 
 
 class Riddle(db.Model):

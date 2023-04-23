@@ -4,8 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from my_app import db
 from my_app.models import User
-from . import auth
-from .forms import LoginForm, RegisterForm
+from my_app.auth import auth
+from my_app.auth.forms import LoginForm, RegisterForm
 
 """" ********************
      Controller : authentication
@@ -21,9 +21,10 @@ def register():
         password = form.password.data
         firstname = form.firstname.data
         lastname = form.lastname.data
+        username = form.username.data
         password_hash = generate_password_hash(password, "sha256")
 
-        new_user = User(email,password_hash,firstname,lastname)
+        new_user = User(email,password_hash,firstname,lastname,username)
 
         db.session.add(new_user)
         db.session.commit()
