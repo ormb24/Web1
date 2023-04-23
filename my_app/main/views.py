@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user, logout_user
 
-#from my_app import main
+from my_app.main import main
 from my_app.main.forms import RiddleForm, ClueForm
 from my_app import db
 from my_app.models import Riddle, Clue

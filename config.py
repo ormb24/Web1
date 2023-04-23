@@ -11,13 +11,13 @@ class Config(object):
 class DevelopmentConfig(Config):
     DEBUG = True
     ENV = "development"
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'vc-dev.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db/vc-dev.db')
     TEMPLATE_AUTO_RELOAD = True
     ENIGMAS_PER_PAGE = 5 #nombre d'énigmes par page, si la pagination est utilisée.
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'vc-prod.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db/vc-prod.db')
 
 config = {
     'development': DevelopmentConfig,
