@@ -23,10 +23,15 @@
     <tr>
         <td>
             {{ riddle.riddle }}
-            <div class="riddle-answer" style="clear:left;display:none;background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
+            <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
+            <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : </div>
         </td>
-        <td class="col-fit"><button onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button></td>
-        <td class="col-fit"><a href="/clue?riddle_id={{riddle.id}}"><button><img src="/static/img/search.svg"</button></a></td>
+        <td class="col-fit"><button title="Montrer la réponse" onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button></td>
+        <td class="col-fit">
+            <button title="Montrer l'indice" onclick="showResponse(clue_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button>
+            <a href="/clue?riddle_id={{riddle.id}}"><button title="Créer / Mettre à jour l'indice"><img src="/static/img/search.svg"</button></a>
+            <a href="/delete_clue?riddle_id={{riddle.id}}"><button title="Delete"><img src="/static/img/trash.svg"</button></a>
+        </td>
         <td class="col-fit">
 
                 <div style="border:solid;padding:0 5 0 5; float:left">{{ riddle.level }}</div>
@@ -42,8 +47,8 @@
                 </div>
 
         </td>
-        <td class="col-fit"><a href="update_riddle?id={{riddle.id}}" class="btn btn-warning">Edit</a></td>
-        <td class="col-fit"><a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger">Delete</a></td>
+        <td class="col-fit"><a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a></td>
+        <td class="col-fit"><a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger" title="Effacer l'énigme">Delete</a></td>
 
         {% if current_user.admin %}
         <td class="col-fit"><a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a></td>

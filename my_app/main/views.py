@@ -227,6 +227,36 @@ def save_clue():
     else:
         return render_template("main/create_clue.html",form=form)
 
+@main.route('/delete_clue', methods=['GET'])
+@login_required
+def delete_clue():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    riddle_id = request.args.get('riddle_id')
+    clue = Clue.query.filter_by(riddle_id=riddle_id).first()
+    riddle = Riddle.query.filter_by(id=riddle_id).first()
+
+    if not (current_user.admin) and not (riddle.user_id == current_user.id):
+        abort(403)
+
+    if clue:
+        try:
+            db.session.delete(clue)
+            db.session.commit()
+            flash("L'indice a été supprimé !", "Success")
+        except BaseException as e:
+            flash("L'indice n'a pas été supprimé : "+ str(e),"Warning")
+    else:
+        flash("Il n'y pas d'indice pour cette énigme ! ", "Warning")
+
+    return list_riddle()
+
+
+
+
 """ ********************
     Controller : Error Pages
     ********************
