@@ -16,7 +16,12 @@
              {{ form.answer(type="text",class="form-control",placeholder="Encodez sa réponse ici...") }}
         </div>
     </div>
-    {% block clue %} {% endblock %}
+    <div class="form-group row" style="margin-bottom:10px">
+        {{ form.clue.label(class="col-sm-1 col-form-label") }}
+        <div class="col-sm-8">
+             {{ form.clue(type="text",class="form-control",placeholder="Encodez un indice...(optionel)") }}
+        </div>
+    </div>
     <div class="form-group row" style="margin-bottom:10px">
         {{ form.level.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-2">
@@ -26,7 +31,4 @@
 
     {{ form.submit(class="btn btn-primary", value=action) }}
 </form>
-{% endblock %}
-{% block footer %}
-
 {% endblock %}

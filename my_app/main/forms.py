@@ -29,6 +29,8 @@ class RiddleForm( FlaskForm ):
                            validators=[DataRequired(message="Le champ ne peut être vide !"),
                                        Length(max=100, message="La réponse ne peut comporter plus de %(max)d caractères !"),
                                        validate_riddle])
+    clue = StringField("Indice : ",
+                       validators=[Length(max=100, message="L'indice ne peut comporter plus de %(max)d caractères !")])
     level = IntegerField("Niveau : ",
                          validators=[DataRequired(message="Veuillez entrer une valeur !"),
                                      NumberRange(min=0, max=10, message="Le niveau de difficulté doit être compris entre %(min)d et %(max)d !")

@@ -18,13 +18,13 @@
         </tr>
     </thead>
     <tbody>
-    {% for riddle in riddles %}
 
+    {% for riddle in riddles %}
     <tr>
         <td>
             {{ riddle.riddle }}
             <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
-            <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : </div>
+            <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
         </td>
         <td class="col-fit"><button title="Montrer la réponse" onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"  /></button></td>
         <td class="col-fit">
@@ -49,10 +49,10 @@
         </td>
         <td class="col-fit"><a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a></td>
         <td class="col-fit"><a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger" title="Effacer l'énigme">Delete</a></td>
-
         {% if current_user.admin %}
         <td class="col-fit"><a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a></td>
         {% endif %}
+
     </tr>
     {% endfor %}
     </tbody>
@@ -64,3 +64,5 @@
     {{ macro.pagination_widget(pagination, 'main.list_riddle') }}
 </div>
 {% endblock %}
+
+

@@ -4,12 +4,11 @@ from flask_login import login_required, current_user, logout_user
 from my_app.main import main
 from my_app.main.forms import RiddleForm, ClueForm
 from my_app import db
-from my_app.models import Riddle, Clue
+from my_app.models import Riddle, Clue, User
 
 @main.route('/')
 @login_required
 def index():
-    #return infos()
     return list_riddle()
 @main.route('/infos')
 def infos():
@@ -34,15 +33,13 @@ def list_riddle():
         return redirect(url_for('auth.login'))
 
     if current_user.admin:
-        #riddles = Riddle.query.all()
-        pagination = db.paginate(db.select(Riddle).order_by(Riddle.id.asc()), per_page=5)
+        pagination = Riddle.query.paginate(page=page, per_page=5)
     else:
-        #riddles = Riddle.query.filter_by(user_id=current_user.id).all()
-        pagination = db.paginate(db.select(Riddle).filter_by(user_id=current_user.id).order_by(Riddle.id.asc()), per_page=5)
+        pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
     riddles = pagination.items
-    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
 
+    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
 def create_riddle():
@@ -66,10 +63,14 @@ def update_riddle():
 
     form = RiddleForm()
 
-    form.id.data = riddle.id
-    form.riddle.data = riddle.riddle
-    form.answer.data = riddle.answer
-    form.level.data = riddle.level
+    if riddle:
+        form.id.data = riddle.id
+        form.riddle.data = riddle.riddle
+        form.answer.data = riddle.answer
+        form.level.data = riddle.level
+    else:
+        flash("Cette énigme n\'existe pas !", 'Danger')
+        return redirect(url_for('main.list_riddle'))
 
     return render_template("main/create_riddle.html", form=form, current_user=current_user, action="Update")
 
@@ -82,30 +83,43 @@ def save_riddle():
         return redirect(url_for('auth.login'))
 
     form = RiddleForm()
-
-    id = int(form.id.data)
-    riddle = form.riddle.data
-    answer = form.answer.data
-    level = int(form.level.data)
-
-    if id != 0:
-        riddle_record = Riddle.query.filter_by(id=id).first()
-        action = "Update"
-        message="L'énigme a été modifiée !"
-    else:
-        riddles = Riddle.query.filter_by(riddle=riddle).first()
-        action = "Create"
-        if riddles:
-            flash("L\'énigme existe déjà en DB !","Danger")
-        else:
-            riddle_record = Riddle(riddle,answer,level,current_user.id)
-            message = "L'énigme a été créée !"
+    action = "Create"
 
     if form.validate_on_submit():
-        riddle_record.riddle = riddle
-        riddle_record.answer = answer
-        riddle_record.level = level
+
+        id = int(form.id.data)
+        riddle = form.riddle.data
+        answer = form.answer.data
+        clue = form.clue.data
+        level = int(form.level.data)
+
+        # Créer ou mettre à jour l'énigme
+        if id != 0:
+            riddle_record = Riddle.query.filter_by(id=id).first()
+            riddle_record.riddle = riddle
+            riddle_record.answer = answer
+            riddle_record.level = level
+            action = "Update"
+            message = "L'énigme a été modifiée !"
+        else:
+            riddles = Riddle.query.filter_by(riddle=riddle).first()
+            action = "Create"
+            # On supposera que l'énigme doit être unique pour tous les utilisateurs; sinon modifier le modèle pour la rendre unique par utilisateur.
+            if riddles:
+                flash("L\'énigme existe déjà en DB !", "Danger")
+                return render_template("main/create_riddle.html", form=form, current_user=current_user, action=action)
+            else:
+                riddle_record = Riddle(riddle=riddle, answer=answer, level=level, user_id=current_user.id)
+                action = "Create"
+                message = "L'énigme a été créée !"
+
         db.session.add(riddle_record)
+
+        #Créer ou mettre à jour l'indice
+        if clue != '':
+            clue_record = Clue(clue=clue, riddle=riddle_record)
+            db.session.add(clue_record)
+
         db.session.commit()
         flash(message, 'Success')
         return redirect(url_for('main.create_riddle')) #To avoid re-submitting a post request on 'Refresh page'.
@@ -122,7 +136,6 @@ def delete_riddle():
         return redirect(url_for('auth.login'))
 
     id = request.args.get('id')
-    #user_id = request.args.get('user_id')
     clue = Clue.query.filter_by(riddle_id=id).first()
     riddle = Riddle.query.filter_by(id=id).first()
 
@@ -130,15 +143,17 @@ def delete_riddle():
         abort(403)
 
     try:
-        if clue:    #on supprime l'indice lié avant de supprimer l'énigme
-            db.session.delete(clue)
+        db.session.delete(riddle.clues)
         db.session.delete(riddle)
         db.session.commit()
+        #if clue:    #on supprime l'indice lié avant de supprimer l'énigme
+        #    db.session.delete(clue)
+        #db.session.delete(riddle)
+        #db.session.commit()
     except BaseException as e:
         flash("L'énigme n'a pas été supprimée : "+ str(e),"Warning")
 
     return list_riddle()
-    #return redirect('/?id='+str(user_id), code=302)
 
 @main.route('/level', methods=['GET'])
 @login_required
@@ -165,6 +180,15 @@ def update_level():
     Controller : Clue
     ********************
 """
+@main.route('/list_clues',methods=['GET'])
+@login_required
+def list_clues():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+
 @main.route('/clue', methods=['GET'])
 @login_required
 def clue():

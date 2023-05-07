@@ -7,6 +7,28 @@ from flask_login import UserMixin
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+class Riddle(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    riddle = db.Column(db.String(250), unique=True, nullable=False)
+    answer = db.Column(db.String(100), nullable=False)
+    level = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    clues = db.relationship('Clue', backref='riddle', cascade="delete, delete-orphan")
+
+    def getid(self):
+        return self.id
+    #def __init__(self, riddle, answer, level, user_id,user=None):
+    #    self.riddle = riddle
+    #    self.answer = answer
+    #    self.level = level
+    #    self.user_id = user_id
+
+    def __repr__(self):
+        repr = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
+        return repr
+    def set_level(self,level):
+        self.level = level
+
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -14,9 +36,9 @@ class User(UserMixin,db.Model):
     password = db.Column(db.String(250), nullable=False)
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
-
     blocked = db.Column(db.Boolean, nullable=False)
     admin = db.Column(db.Boolean, nullable=False)
+    riddles = db.relationship('Riddle', backref='user')
 
     def __init__(self, email, password, firstname, lastname, username):
         self.email = email
@@ -30,46 +52,22 @@ class User(UserMixin,db.Model):
         rep = "User : {}, {}\nEmail : {}".format(self.lastname, self.firstname, self.email)
         return rep
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        #self.password_hash = generate_password_hash(password)
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        #return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
     def get_username(self):
         return self.username
     def get_id(self):
         return self.id
 
 
-class Riddle(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    riddle = db.Column(db.String(250), unique=True, nullable=False)
-    answer = db.Column(db.String(100), nullable=False)
-    level = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    #user = db.relationship('User', backref=db.backref('riddle'))
-    user = db.relationship('User', backref=db.backref('riddles', lazy=True))
-
-    def __init__(self, riddle, answer, level, user_id):
-        self.riddle = riddle
-        self.answer = answer
-        self.level = level
-        self.user_id = user_id
-    def __repr__(self):
-        repr = "id : {}, riddle : {}, answer : {}, level : {}, uid : {}".format(self.id, self.riddle, self.answer, self.level, self.user_id)
-        return repr
-    def set_level(self,level):
-        self.level = level
-
-
 class Clue(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     clue = db.Column(db.String(100))
     riddle_id = db.Column(db.Integer, db.ForeignKey('riddle.id'), nullable=False)
-    riddle = db.relationship('Riddle', backref=db.backref('riddles', lazy=True))
-
-    def __init__(self,clue,riddle_id):
-        self.clue = clue
-        self.riddle_id = riddle_id
 
     def __repr__(self):
         repr = "id : {}, clue : {}, riddle_id : {}".format(self.id,self.clue,self.riddle_id)

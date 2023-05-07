@@ -7,6 +7,7 @@ function showResponse(divId) {
        divId.style.display = "none";
     }
 }
+
 /**
 * Name : showHide(myDiv)
 * Description : Show / Hide Element by Id
