@@ -4,6 +4,8 @@
 <a href="/update?name={{ task.name }}&id={{ key }}" class="btn">Update</a>
 {% endmacro %}
 -->
+
+<!-- affiche le menu de navigation -->
 {% macro navigation(current_user) %}
 <nav class="navbar navbar-expand-md navbar-light bg-dark fixed-top">
     <ul class="nav nav-pills">
@@ -33,16 +35,38 @@
 </nav>
 {% endmacro %}
 
-{% macro flash() %}
-    {% with messages = get_flashed_messages() %}
+<!-- affiche les erreurs renvoyées par les formulaires !-->
+{% macro form_errors() %}
+    {% if form is defined and form.errors is defined %}
+        {% set count = 0 %}
+            {% for field, errors in form.errors.items() %}
+                {% set count = count+1 %}
+                <div class="alert alert-danger" id="formValidationError_{{ count }}">
+                    <button type="button" class="close" onClick="showHide('formValidationError_{{ count }}')">&times;</button>
+                    {{ form[field].label }} {{ ' : '.join(errors) }}
+                </div>
+            {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+<!-- Flash messages : colored by category, with a 'close' button to hide them  -->
+{% macro flash_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true, category_filter=['Info','Success','Warning','Danger']) %}
         {% if messages %}
-            {% for message in messages %}
-                {{ message }}
+            {% set count = 0 %}
+            {% for category,message in messages %}
+                {% set count = count +1 %}
+                <div class="alert alert-{{ category }}" id="alert{{ category }}_{{ count }}">
+                    <button type="button" class="close" onClick="showHide('alert{{ category }}_{{ count }}')">&times;</button>
+                    {{ category }} : {{ message }}
+                </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 {% endmacro %}
 
+
+<!-- affiche la pagination -->
 {% macro pagination_widget(pagination, endpoint) %}
 <ul class="pagination">
     <li {% if not pagination.has_prev %} class="disabled" {% endif %}>
@@ -73,7 +97,17 @@
 </ul>
 {% endmacro %}
 
-{% macro riddle_item(id) %}
-<a href="riddle_delete?id={{id}}" class="btn btn-danger">Delete</a>
-<a href="riddle_update?id={{id}}" class="btn btn-info">Update</a>
+
+<!-- par énigme, affiche les boutons : edit, delete; et l'utilisateur propriétaire, si l'on est admin. -->
+{% macro riddle_item(riddle) %}
+    <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a>
+    <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger" title="Effacer l'énigme">Delete</a>
 {% endmacro %}
+<!-- par énigme, affiche les actions possibles sur les indices : voir et ajouter-->
+{% macro clue_item(riddle) %}
+    {#<!--<button title="Montrer l'indice" onclick="showResponse(clue_{{ loop.index }})"><img src="/static/img/eye.svg"/></button>-->#}
+    <a href="/display_clue?riddle_id={{riddle.id}}"><button title="Afficher les indices"><img src="/static/img/eye.svg"></button></a>
+    <a href="/add_clue?riddle_id={{riddle.id}}"><button title="Ajouter un indice"><img src="/static/img/plus-lg.svg"></button></a>
+    {#<a href="/clue?riddle_id={{riddle.id}}"><button title="Créer / Mettre à jour l'indice"><img src="/static/img/search.svg"</button></a>
+    <a href="/delete_clue?riddle_id={{riddle.id}}"><button title="Delete"><img src="/static/img/trash.svg"</button></a>#}
+{% endmacro%}

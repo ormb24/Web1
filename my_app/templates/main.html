@@ -12,30 +12,10 @@
         {% endblock %}
 
         <div class="container" style="margin-top: 60px">
-            <!-- Error messages in forms -->
-            {% if form is defined and form.errors is defined %}
-                {% set count =0 %}
-                {% for field, errors in form.errors.items() %}
-                    {% set count = count+1 %}
-                    <div class="alert alert-danger" id="formValidationError_{{ count }}">
-                        <button type="button" class="close" onClick="showHide('formValidationError_{{ count }}')">&times;</button>
-                        {{ form[field].label }} {{ ' : '.join(errors) }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-            <!-- Flash messages : colored by category, with a 'close' button to hide them  -->
-            {% with messages = get_flashed_messages(with_categories=true, category_filter=['Info','Success','Warning','Danger']) %}
-            {% if messages %}
-                {% set count = 0 %}
-                {% for category,message in messages %}
-                    {% set count = count +1 %}
-                    <div class="alert alert-{{ category }}" id="alert{{ category }}_{{ count }}">
-                        <button type="button" class="close" onClick="showHide('alert{{ category }}_{{ count }}')">&times;</button>
-                        {{ category }} : {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-            {% endwith %}
+            {% block display_messages %}
+                {{ macro.form_errors() }}
+                {{ macro.flash_messages() }}
+            {% endblock %}
 
             <!-- Body block -->
             {% block body %}{% endblock %}
@@ -45,8 +25,11 @@
             {% block footer %}{% endblock %}
         </footer>
 
-        <script src="/static/js/jquery-3.6.3.min.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
-        <script src="/static/js/my.js"></script>
+
+        <script src="{{ url_for('static', filename='js/jquery-3.6.3.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/my.js') }}"></script>
+        {% block scripts %}
+        {% endblock %}
     </body>
 </html>

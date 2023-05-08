@@ -7,28 +7,6 @@ from flask_login import UserMixin
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class Riddle(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    riddle = db.Column(db.String(250), unique=True, nullable=False)
-    answer = db.Column(db.String(100), nullable=False)
-    level = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    clues = db.relationship('Clue', backref='riddle', cascade="delete, delete-orphan")
-
-    def getid(self):
-        return self.id
-    #def __init__(self, riddle, answer, level, user_id,user=None):
-    #    self.riddle = riddle
-    #    self.answer = answer
-    #    self.level = level
-    #    self.user_id = user_id
-
-    def __repr__(self):
-        repr = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
-        return repr
-    def set_level(self,level):
-        self.level = level
-
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -62,6 +40,29 @@ class User(UserMixin,db.Model):
         return self.username
     def get_id(self):
         return self.id
+
+class Riddle(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    riddle = db.Column(db.String(250), unique=True, nullable=False)
+    answer = db.Column(db.String(100), nullable=False)
+    level = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    clues = db.relationship('Clue', backref='riddle', cascade="delete, delete-orphan")
+
+    def getid(self):
+        return self.id
+    #def __init__(self, riddle, answer, level, user_id,user=None):
+    #    self.riddle = riddle
+    #    self.answer = answer
+    #    self.level = level
+    #    self.user_id = user_id
+
+    def __repr__(self):
+        repr = "id : {}, riddle : {}, answer : {}, level : {}".format(self.id, self.riddle, self.answer, self.level)
+        return repr
+    def set_level(self,level):
+        self.level = level
+
 
 
 class Clue(db.Model):

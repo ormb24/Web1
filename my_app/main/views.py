@@ -165,16 +165,12 @@ def update_level():
     if (request.args.get("direction") == 'up'):
         if (riddle.level<10):
             riddle.set_level(riddle.level + 1)
-        else:
-            flash("Le niveau ne peut être supérieur à 10 !","Warning")
     else:
-        if (riddle.level > 0):
+        if (riddle.level >0):
             riddle.set_level(riddle.level - 1)
-        else:
-            flash("Le niveau ne peut être inférieur à 0 !","Warning")
 
     db.session.commit()
-    return list_riddle()
+    return str(riddle.level)
 
 """ ********************
     Controller : Clue
@@ -219,6 +215,7 @@ def clue():
         abort(403)
 
     return render_template(template, form=form)
+
 
 @main.route('/save_clue',methods=['POST'])
 @login_required
