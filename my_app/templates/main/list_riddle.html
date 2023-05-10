@@ -14,10 +14,9 @@
     </thead>
     <tbody>
     {% for riddle in riddles %}
-    <div class="riddle_id" id="riddle_{{ riddle.id }}" style="display:none">{{ riddle.id }}</div>
-        <tr class="riddle_row">
+        <tr class="riddle_row" id="{{ riddle.id }}">
             <td>
-                <div class="riddle"">{{ riddle.riddle }}</div>
+                <div class="riddle">{{ riddle.riddle }}</div>
                 <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ riddle.id }}" class="answer">Réponse : {{ riddle.answer }}</div>
                 <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
             </td>
@@ -97,18 +96,30 @@
             //$('#debug').append("direct de la fonction")
             $.ajax({
                 url: url,
-                success : function (data) {
-                    //document.getElementById("debug").innerHTML += "Success : ";
-                    //document.getElementById("debug").innerHTML += "Nombre de JSON : " + data.count();
+                success : function (data) {  // attendu dans 'data', une liste de json.
+                    // Crée un tableau avec les id's des énigmes de la page; au départ des balises de classe 'riddle_id'
+                    $('.riddle_row:even').css("background-color","red");
+                    riddle_ids = $(".riddle_row").map(function() {
+                        return parseInt(this.id);
+                    });
+                    var j=0; // compteur pour la liste des riddle_ids[]
                     for (i in data) {
                         document.getElementById("debug").innerHTML += "Riddle : " + data[i].riddle +"<br/>\n";
-                        document.getElementById("debug").innerHTML += "Riddle id : " + data[i].id +"<br/>\n";
-                        //if ($(.'riddle_id').val() == data[i].id) { continue; }
-                        //$(.'')
+                        //document.getElementById("debug").innerHTML += "Riddle id : " + data[i].id +"<br/>\n";
+                        document.getElementById("debug").innerHTML += "DOM id : " + riddle_ids[j] + "<=> JSON id : "+ data[i].id+"<br/>\n";
+                        if (data[i].id == riddle_ids[j]) {
+                            $(".riddle_row"+"#"+riddle_ids[j]).html("proute");
+                            j++;
+                            continue;
+                        }
+
+                        var ridid="#riddle_"+riddle_ids[j]+" .riddle";
+
+                        //document.getElementById(ridid).innerHTML+="caca";
+                        $(ridid).html("toto");// data[i].riddle;
+                        j++;
                     }
-                    $('.riddle_row:even').css("background-color","red");
-                    var riddle_ids = $(".riddle_id");
-                    document.getElementById("debug").innerHTML += "Liste des riddle ids dans le DOM :"+riddle_ids[1].innerHTML;
+                    //document.getElementById("debug").innerHTML += "Liste des riddle ids dans le DOM :"+riddle_ids[1];
                 }
             });
         });
