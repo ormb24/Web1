@@ -7,7 +7,7 @@
         <tr>
             <th>Enigme</th>
             <th>Reponse</th>
-            <th style="padding-left:30; padding-right:30" >Niveau</th>
+            <th style="padding-left:30px; padding-right:30px" >Niveau</th>
             <th>Enigme</th>
             <th>Indice</th>
         </tr>
@@ -15,46 +15,55 @@
     <tbody>
     {% for riddle in riddles %}
         <tr>
-        <td>
-            {{ riddle.riddle }}
-            <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
-            <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
-        </td>
-        <td class="col-fit">
-            <button title="Montrer la réponse" onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"/></button>
-        </td>
-        {% block clue %}{% endblock %}
-        <!-- Riddle difficulty level -->
-        <td class="col-fit" >
-            <div style="border:solid;padding:0 5 0 5; float:left" class="level">{{ riddle.level }}</div>
-            <div style="float:left" >
-                <a href="/level?id={{ riddle.id }}&direction=up" class="level_down_up">
-                    <img src="/static/img/file-arrow-up-fill.svg" style="width:30px" >
-                </a>
-            </div>
-            <div style="float:left">
-                <a href="/level?id={{ riddle.id }}&direction=down" class="level_down_up">
-                    <img src="/static/img/file-arrow-down-fill.svg" style="width:30px" >
-                </a>
-            </div>
-        </td>
+            <td>
+                <div class="riddle" id="riddle_{{ loop.index }}">{{ riddle.riddle }}</div>
+                <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
+                <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
+            </td>
+            <td class="col-fit">
+                <button title="Montrer la réponse" onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"/></button>
+            </td>
+            {% block clue %}{% endblock %}
+            <!-- Riddle difficulty level -->
+            <td class="col-fit" >
+                <div style="border:solid;padding:0px 5px 0px 5px; float:left" class="level">{{ riddle.level }}</div>
+                <div style="float:left" >
+                    <a href="/level?id={{ riddle.id }}&direction=up" class="level_down_up">
+                        <img src="/static/img/file-arrow-up-fill.svg" style="width:30px" >
+                    </a>
+                </div>
+                <div style="float:left">
+                    <a href="/level?id={{ riddle.id }}&direction=down" class="level_down_up">
+                        <img src="/static/img/file-arrow-down-fill.svg" style="width:30px" >
+                    </a>
+                </div>
+            </td>
         <!-- ...............................-->
 
-        <td class="col-fit">
-            {{ macro.riddle_item(riddle) }}
-            {% if current_user.admin %}
+            <td class="col-fit">
+                <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a>
+                <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger riddle_delete" title="Effacer l'énigme">Delete</a>
+                {% if current_user.admin %}
                 <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a>
             {% endif %}
-        </td>
-        <td class="col-fit">
-            {{ macro.clue_item(riddle) }}
-        </td>
-
-
+            </td>
+            <td class="col-fit">
+                {{ macro.clue_item(riddle) }}
+         </td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+    <li class="page-item"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+  </ul>
+</nav>
+<div id="test">bonjour</div>
 {% endblock %}
 
 {% block footer %}
@@ -75,6 +84,22 @@
                 url: url,
                 success: function(new_value) {
                     $button.parent().parent().find('.level').text(new_value);
+                }
+            });
+        });
+        // Suppression d'énigmes
+        $('.riddle_delete').click(function(e) {
+            e.preventDefault();
+            var $button=$(this);
+            var url = $button.attr('href');
+            //$('#test').append("direct de la fonction")
+            $.ajax({
+                url: url,
+                success : function (data) {
+                    //document.getElementById("test").innerHTML += "Success : ";
+                    for (i in data) {
+                        document.getElementById("test").innerHTML += "Riddle : " + data[i].riddle +"\n";
+                    }
                 }
             });
         });

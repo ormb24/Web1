@@ -1,10 +1,10 @@
-from flask import render_template, redirect, url_for, request, flash, abort
+from flask import render_template, redirect, url_for, request, flash, abort, jsonify, json
 from flask_login import login_required, current_user, logout_user
 
 from my_app.main import main
 from my_app.main.forms import RiddleForm, ClueForm
 from my_app import db
-from my_app.models import Riddle, Clue, User
+from my_app.models import Riddle, Clue, User, Category
 
 @main.route('/')
 @login_required
@@ -23,7 +23,7 @@ def list():
     Controller : Riddle
     *******************
 """
-@main.route('/list_riddle', methods=['GET','POST'])
+@main.route('/list_riddle', methods=['GET'])
 @login_required
 def list_riddle():
     page = request.args.get('page', 1, type=int)
@@ -37,9 +37,43 @@ def list_riddle():
     else:
         pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
+
     riddles = pagination.items
+    num_list = []
+    for i in pagination.iter_pages(left_edge = 3, right_edge=3, left_current=3, right_current=3):
+        num_list.append(i)
+
+    #return jsonify({'json_list': [i.serialize for i in pagination.itms], 'pages_lst':num_list})
+
+
 
     return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
+
+@main.route('/list_riddle_ajax',methods=['GET','POST'])
+@login_required
+def list_riddle_ajax():
+    page = request.args.get('page', 1, type=int)
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    if current_user.admin:
+        pagination = Riddle.query.paginate(page=page, per_page=5)
+    else:
+        pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
+
+
+    """
+    pagination = Category.query.paginate(page=page, per_page=5)
+    categories = pagination.items
+    categories = Category.query.first()
+    """
+    riddles = pagination.items
+
+    rep = riddles
+    return jsonify(rep)
+
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
 def create_riddle():
@@ -136,24 +170,19 @@ def delete_riddle():
         return redirect(url_for('auth.login'))
 
     id = request.args.get('id')
-    clue = Clue.query.filter_by(riddle_id=id).first()
     riddle = Riddle.query.filter_by(id=id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
         abort(403)
-
     try:
-        db.session.delete(riddle.clues)
         db.session.delete(riddle)
         db.session.commit()
-        #if clue:    #on supprime l'indice lié avant de supprimer l'énigme
-        #    db.session.delete(clue)
-        #db.session.delete(riddle)
-        #db.session.commit()
+
     except BaseException as e:
         flash("L'énigme n'a pas été supprimée : "+ str(e),"Warning")
 
-    return list_riddle()
+    #return list_riddle()
+    return list_riddle_ajax()
 
 @main.route('/level', methods=['GET'])
 @login_required

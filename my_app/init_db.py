@@ -1,5 +1,5 @@
 from my_app import db
-from my_app.models import User, Riddle, Clue
+from my_app.models import User, Riddle, Clue, Category
 
 db.drop_all()
 db.create_all()
@@ -29,8 +29,15 @@ clue3=Clue(clue="MyClue03",riddle=riddle3)
 clue4=Clue(clue="MyClue04",riddle=riddle4)
 clue5=Clue(clue="MyClue05",riddle=riddle5)
 
+category1=Category(name="Devinette")
+category2=Category(name="Mathématiques")
+category3=Category(name="Logique")
+category4=Category(name="Connaissances")
+category5=Category(name="Animaux")
+
 db.session.add_all([user1])
 db.session.add_all([riddle1, riddle2, riddle3, riddle4, riddle5, riddle6, riddle7, riddle8, riddle9])
 db.session.add_all([clue1, clue2, clue3, clue4, clue5, clue1a, clue1b, clue1c])
+db.session.add_all([category1,category2,category3,category4,category5])
 
 db.session.commit()

@@ -2,6 +2,7 @@ from my_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from my_app import login_manager
 from flask_login import UserMixin
+from dataclasses import dataclass
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -41,13 +42,15 @@ class User(UserMixin,db.Model):
     def get_id(self):
         return self.id
 
+@dataclass
 class Riddle(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    riddle = db.Column(db.String(250), unique=True, nullable=False)
-    answer = db.Column(db.String(100), nullable=False)
-    level = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    clues = db.relationship('Clue', backref='riddle', cascade="delete, delete-orphan")
+    __allow_unmapped__ = True
+    id:int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    riddle:str = db.Column(db.String(250), unique=True, nullable=False)
+    answer:str = db.Column(db.String(100), nullable=False)
+    level:int = db.Column(db.Integer, nullable=False)
+    user_id:int = db.Column(db.Integer, db.ForeignKey('user.id'))
+    clues:list = db.relationship('Clue', backref='riddle', cascade="delete, delete-orphan")
 
     def getid(self):
         return self.id
@@ -64,12 +67,18 @@ class Riddle(db.Model):
         self.level = level
 
 
-
+@dataclass
 class Clue(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    clue = db.Column(db.String(100))
-    riddle_id = db.Column(db.Integer, db.ForeignKey('riddle.id'), nullable=False)
+    id:int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    clue:str = db.Column(db.String(100))
+    riddle_id:int = db.Column(db.Integer, db.ForeignKey('riddle.id'), nullable=False)
 
     def __repr__(self):
         repr = "id : {}, clue : {}, riddle_id : {}".format(self.id,self.clue,self.riddle_id)
         return repr
+
+
+@dataclass
+class Category(db.Model):
+    id:int = db.Column(db.Integer, primary_key=True)
+    name:str = db.Column(db.String(30))
