@@ -14,14 +14,15 @@
     </thead>
     <tbody>
     {% for riddle in riddles %}
-        <tr>
+    <div class="riddle_id" id="riddle_{{ riddle.id }}" style="display:none">{{ riddle.id }}</div>
+        <tr class="riddle_row">
             <td>
-                <div class="riddle" id="riddle_{{ loop.index }}">{{ riddle.riddle }}</div>
-                <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ loop.index }}">Réponse : {{ riddle.answer }}</div>
+                <div class="riddle"">{{ riddle.riddle }}</div>
+                <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ riddle.id }}" class="answer">Réponse : {{ riddle.answer }}</div>
                 <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
             </td>
             <td class="col-fit">
-                <button title="Montrer la réponse" onclick="showResponse(answer_{{ loop.index }})"><img src="/static/img/eye.svg"/></button>
+                <button title="Montrer la réponse" onclick="showResponse(answer_{{ riddle.id }})"><img src="/static/img/eye.svg"/></button>
             </td>
             {% block clue %}{% endblock %}
             <!-- Riddle difficulty level -->
@@ -63,7 +64,7 @@
     <li class="page-item"><a class="page-link" href="#">Next</a></li>
   </ul>
 </nav>
-<div id="test">bonjour</div>
+<div id="debug" style="border:2px solid red">Debug :<br/></div>
 {% endblock %}
 
 {% block footer %}
@@ -92,14 +93,22 @@
             e.preventDefault();
             var $button=$(this);
             var url = $button.attr('href');
-            //$('#test').append("direct de la fonction")
+
+            //$('#debug').append("direct de la fonction")
             $.ajax({
                 url: url,
                 success : function (data) {
-                    //document.getElementById("test").innerHTML += "Success : ";
+                    //document.getElementById("debug").innerHTML += "Success : ";
+                    //document.getElementById("debug").innerHTML += "Nombre de JSON : " + data.count();
                     for (i in data) {
-                        document.getElementById("test").innerHTML += "Riddle : " + data[i].riddle +"\n";
+                        document.getElementById("debug").innerHTML += "Riddle : " + data[i].riddle +"<br/>\n";
+                        document.getElementById("debug").innerHTML += "Riddle id : " + data[i].id +"<br/>\n";
+                        //if ($(.'riddle_id').val() == data[i].id) { continue; }
+                        //$(.'')
                     }
+                    $('.riddle_row:even').css("background-color","red");
+                    var riddle_ids = $(".riddle_id");
+                    document.getElementById("debug").innerHTML += "Liste des riddle ids dans le DOM :"+riddle_ids[1].innerHTML;
                 }
             });
         });
