@@ -9,14 +9,6 @@ h3 {
     text-align : center;
     text-decoration: underline;
 }
-/*
- * Elements à masquer montrer pour les énigmes(clue et answer)
-*/
-.riddle-showhide {
-    clear:left;
-    display:none;
-    padding-left: 10px;
-}
 
 /*
  * Redefining bootstrap classes

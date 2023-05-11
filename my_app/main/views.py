@@ -244,7 +244,14 @@ def clue():
         abort(403)
 
     return render_template(template, form=form)
-
+@main.route('/update_clue', methods=['GET'])
+@login_required
+def update_clue():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+    return render_template("main/create_clue.html", form=form)
 
 @main.route('/save_clue',methods=['POST'])
 @login_required

@@ -1,68 +1,49 @@
 {% extends "main.html" %}
 {% block body %}
 <h1>Liste des énigmes</h1>
-
-<table class="table">
-    <thead class="thead-dark">
-        <tr>
-            <th>Enigme</th>
-            <th>Reponse</th>
-            <th style="padding-left:30px; padding-right:30px" >Niveau</th>
-            <th>Enigme</th>
-            <th>Indice</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for riddle in riddles %}
-        <tr class="riddle_row" id="{{ riddle.id }}">
-            <td>
-                <div class="riddle">{{ riddle.riddle }}</div>
-                <div class="riddle-showhide" style="background-color:yellow" id="answer_{{ riddle.id }}" class="answer">Réponse : {{ riddle.answer }}</div>
-                <div class="riddle-showhide" style="background-color:#42f5b6" id="clue_{{ loop.index }}">Indice : {{ riddle.clue }} </div>
-            </td>
-            <td class="col-fit">
-                <button title="Montrer la réponse" onclick="showResponse(answer_{{ riddle.id }})"><img src="/static/img/eye.svg"/></button>
-            </td>
-            {% block clue %}{% endblock %}
+{% for riddle in riddles %}
+    <div class="riddle" id="{{ riddle.id }}" style="border:1px solid;margin-bottom:10px;padding:5px 5px 5px 5px">
+        <!-- Partie concernant l'énigme elle-même -->
+            Enigme : {{ riddle.riddle }}<br/>
+            <div class="answer" style="display:none">Réponse : {{ riddle.answer }}</div>
             <!-- Riddle difficulty level -->
-            <td class="col-fit" >
-                <div style="border:solid;padding:0px 5px 0px 5px; float:left" class="level">{{ riddle.level }}</div>
-                <div style="float:left" >
-                    <a href="/level?id={{ riddle.id }}&direction=up" class="level_down_up">
-                        <img src="/static/img/file-arrow-up-fill.svg" style="width:30px" >
-                    </a>
-                </div>
-                <div style="float:left">
-                    <a href="/level?id={{ riddle.id }}&direction=down" class="level_down_up">
-                        <img src="/static/img/file-arrow-down-fill.svg" style="width:30px" >
-                    </a>
-                </div>
-            </td>
-        <!-- ...............................-->
-
-            <td class="col-fit">
-                <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a>
-                <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger riddle_delete" title="Effacer l'énigme">Delete</a>
-                {% if current_user.admin %}
-                <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a>
+            <div style="float:left">
+                <a href="/level?id={{ riddle.id }}&direction=down" class="level_down_up" style="float:left">
+                    <img src="/static/img/file-arrow-down-fill.svg" style="width:24px">
+                </a>
+                <div class="level" style="border:solid 1px;padding-left:10px; padding-right:10px;float:left">{{ riddle.level }}</div>
+                <a href="/level?id={{ riddle.id }}&direction=up" class="level_down_up">
+                    <img src="/static/img/file-arrow-up-fill.svg" style="width:24px">
+                </a>
+            </div>
+            <!-- ...............................-->
+            <button class="btn btn-info btn-sm show_answer" >Afficher la réponse</button>
+            <a href="update_riddle?id={{riddle.id}}" class="btn btn-primary btn-sm" title="Editer l'énigme">Modifier</a>
+            <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle" title="Supprimer l'énigme">Supprimer</a>
+            {% if current_user.admin %}
+            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a>
             {% endif %}
-            </td>
-            <td class="col-fit">
-                {{ macro.clue_item(riddle) }}
-         </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-<nav aria-label="Page navigation example">
-  <ul class="pagination">
-    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-    <li class="page-item"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-  </ul>
-</nav>
+
+
+        <!-- Partie concernant les indices liés à l'énigme -->
+        {% if riddle.clues|length > 0 %}
+        <div class="clues">
+            <div style="text-decoration:underline">Indices :</div>
+            <ul class="list-group">
+                {% for clue in riddle.clues %}
+                <li class="list-group-item">
+                    {{ clue.clue }}
+                    <a href="{{url_for('main.delete_clue',riddle_id=riddle.id)}}"><button type="button" class="btn btn-outline-danger btn-sm" style="float:right">Supprimer</button></a>
+                    <a href="{{url_for('main.update_clue',riddle_id=riddle.id)}}"><button type="button" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</button></a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+{% endfor %}
+
+<!-- Zone test : pour affichage d'infos ! Effacer après tests -->
 <div id="debug" style="border:2px solid red">Debug :<br/></div>
 {% endblock %}
 
@@ -83,43 +64,50 @@
             $.ajax({
                 url: url,
                 success: function(new_value) {
-                    $button.parent().parent().find('.level').text(new_value);
+                    $button.parent().find('.level').text(new_value);
                 }
             });
         });
+        //Affichage de la réponse :
+        $(".show_answer").click(function() {
+            var $button=$(this);
+            if ($button.text() == "Afficher la réponse") {
+                $button.text("Cacher la réponse");
+                $button.parent().find(".answer").show();
+            } else {
+                $button.text("Afficher la réponse");
+                $button.parent().find(".answer").hide();
+            }
+        });
+
         // Suppression d'énigmes
-        $('.riddle_delete').click(function(e) {
+        $('.delete_riddle').click(function(e) {
             e.preventDefault();
             var $button=$(this);
             var url = $button.attr('href');
-
-            //$('#debug').append("direct de la fonction")
             $.ajax({
                 url: url,
                 success : function (data) {  // attendu dans 'data', une liste de json.
                     // Crée un tableau avec les id's des énigmes de la page; au départ des balises de classe 'riddle_id'
                     $('.riddle_row:even').css("background-color","red");
-                    riddle_ids = $(".riddle_row").map(function() {
+                    riddle_ids = $(".riddle").map(function() {
                         return parseInt(this.id);
                     });
                     var j=0; // compteur pour la liste des riddle_ids[]
                     for (i in data) {
-                        document.getElementById("debug").innerHTML += "Riddle : " + data[i].riddle +"<br/>\n";
-                        //document.getElementById("debug").innerHTML += "Riddle id : " + data[i].id +"<br/>\n";
-                        document.getElementById("debug").innerHTML += "DOM id : " + riddle_ids[j] + "<=> JSON id : "+ data[i].id+"<br/>\n";
-                        if (data[i].id == riddle_ids[j]) {
-                            $(".riddle_row"+"#"+riddle_ids[j]).html("proute");
-                            j++;
-                            continue;
+                        // Requires : les deux listes (data et riddle_ids) sont triées par valeur de riddle.id croissant.
+                        if (j < riddle_ids.length) {
+                            //document.getElementById("debug").innerHTML += "Riddle : " + data[i].riddle +"<br/>\n";
+                            //document.getElementById("debug").innerHTML += "DOM id : " + riddle_ids[j] + "<=> JSON id : "+ data[i].id+"<br/>\n";
+                            if (data[i].id == riddle_ids[j]) {
+                                j++;
+                                continue;
+                            } else {
+
+                                j++;
+                            }
                         }
-
-                        var ridid="#riddle_"+riddle_ids[j]+" .riddle";
-
-                        //document.getElementById(ridid).innerHTML+="caca";
-                        $(ridid).html("toto");// data[i].riddle;
-                        j++;
                     }
-                    //document.getElementById("debug").innerHTML += "Liste des riddle ids dans le DOM :"+riddle_ids[1];
                 }
             });
         });
