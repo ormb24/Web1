@@ -89,7 +89,7 @@ def update_riddle():
         logout_user()
         return redirect(url_for('auth.login'))
 
-    id = request.args.get('id')
+    id = request.args.get('riddle_id')
     riddle = Riddle.query.filter_by(id=id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
@@ -169,7 +169,7 @@ def delete_riddle():
         logout_user()
         return redirect(url_for('auth.login'))
 
-    id = request.args.get('id')
+    id = request.args.get('riddle_id')
     riddle = Riddle.query.filter_by(id=id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
@@ -186,8 +186,8 @@ def delete_riddle():
 
 @main.route('/level', methods=['GET'])
 @login_required
-def update_level():
-    id = request.args.get("id")
+def level():
+    id = request.args.get("riddle_id")
 
     riddle = Riddle.query.filter_by(id=id).first()
 

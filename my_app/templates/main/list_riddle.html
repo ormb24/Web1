@@ -1,27 +1,30 @@
 {% extends "main.html" %}
 {% block body %}
 <h1>Liste des énigmes</h1>
+{% set count = namespace(value=0) %}
 {% for riddle in riddles %}
-    <div class="riddle" id="{{ riddle.id }}" style="border:1px solid;margin-bottom:10px;padding:5px 5px 5px 5px">
+    Count : {{ count.value }}
+    <div class="riddle" id="riddlediv_{{count.value}}" style="border:1px solid;margin-bottom:10px;padding:5px 5px 5px 5px">
+    {% set count.value = count.value +1 %}
         <!-- Partie concernant l'énigme elle-même -->
             Enigme : {{ riddle.riddle }}<br/>
             <div class="answer" style="display:none">Réponse : {{ riddle.answer }}</div>
             <!-- Riddle difficulty level -->
             <div style="float:left">
-                <a href="/level?id={{ riddle.id }}&direction=down" class="level_down_up" style="float:left">
+                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='down')}}" class="level_down_up" style="float:left">
                     <img src="/static/img/file-arrow-down-fill.svg" style="width:24px">
                 </a>
                 <div class="level" style="border:solid 1px;padding-left:10px; padding-right:10px;float:left">{{ riddle.level }}</div>
-                <a href="/level?id={{ riddle.id }}&direction=up" class="level_down_up">
+                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='up')}}" class="level_down_up">
                     <img src="/static/img/file-arrow-up-fill.svg" style="width:24px">
                 </a>
             </div>
             <!-- ...............................-->
             <button class="btn btn-info btn-sm show_answer" >Afficher la réponse</button>
-            <a href="update_riddle?id={{riddle.id}}" class="btn btn-primary btn-sm" title="Editer l'énigme">Modifier</a>
-            <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle" title="Supprimer l'énigme">Supprimer</a>
+            <a href="update_riddle?riddle_id={{riddle.id}}" class="btn btn-primary btn-sm update_riddle" title="Editer l'énigme">Modifier</a>
+            <a href="delete_riddle?riddle_id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle" title="Supprimer l'énigme">Supprimer</a>
             {% if current_user.admin %}
-            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info">{{riddle.user.username}}</a>
+            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info riddle_owner">{{riddle.user.username}}</a>
             {% endif %}
 
 
@@ -85,28 +88,25 @@
             e.preventDefault();
             var $button=$(this);
             var url = $button.attr('href');
+            var $riddle=$button.parent();
+
+
             $.ajax({
                 url: url,
                 success : function (data) {  // attendu dans 'data', une liste de json.
-                    // Crée un tableau avec les id's des énigmes de la page; au départ des balises de classe 'riddle_id'
-                    $('.riddle_row:even').css("background-color","red");
-                    riddle_ids = $(".riddle").map(function() {
-                        return parseInt(this.id);
-                    });
-                    var j=0; // compteur pour la liste des riddle_ids[]
                     for (i in data) {
-                        // Requires : les deux listes (data et riddle_ids) sont triées par valeur de riddle.id croissant.
-                        if (j < riddle_ids.length) {
-                            //document.getElementById("debug").innerHTML += "Riddle : " + data[i].riddle +"<br/>\n";
-                            //document.getElementById("debug").innerHTML += "DOM id : " + riddle_ids[j] + "<=> JSON id : "+ data[i].id+"<br/>\n";
-                            if (data[i].id == riddle_ids[j]) {
-                                j++;
-                                continue;
-                            } else {
+                        $("#riddlediv_"+i).find(".answer").text(data[i].answer);
+                        $("#riddlediv_"+i+" a").each(function() {
+                                $(this).css("background-color","red");
+                                //On adapte les url
+                                var url = $(this).attr('href');
+                                var new_target = "riddle_id="+data[i].id;
+                                url=url.replace(/riddle_id=([0-9]+)/,new_target);
+                                //document.getElementById("debug").innerHTML += 'url:'+url+"</br>\n";
+                                $(this).attr("href",url);
+                            });
 
-                                j++;
-                            }
-                        }
+
                     }
                 }
             });
