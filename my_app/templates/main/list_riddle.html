@@ -3,12 +3,12 @@
 <h1>Liste des énigmes</h1>
 {% set count = namespace(value=0) %}
 {% for riddle in riddles %}
-    Count : {{ count.value }}
-    <div class="riddle" id="riddlediv_{{count.value}}" style="border:1px solid;margin-bottom:10px;padding:5px 5px 5px 5px">
+
+    <div class="riddlediv" id="riddlediv_{{count.value}}" style="border:1px solid;margin-bottom:10px;padding:5px 5px 5px 5px">
     {% set count.value = count.value +1 %}
         <!-- Partie concernant l'énigme elle-même -->
-            Enigme : {{ riddle.riddle }}<br/>
-            <div class="answer" style="display:none">Réponse : {{ riddle.answer }}</div>
+            <div class="riddle" style="margin-bottom:5px"><b>Enigme : </b>{{ riddle.riddle }}</div>
+            <div class="answer" style="display:none;margin-bottom:5px"><b><i>Réponse : </b></i>{{ riddle.answer }}</div>
             <!-- Riddle difficulty level -->
             <div style="float:left">
                 <a href="{{url_for('main.level',riddle_id=riddle.id,direction='down')}}" class="level_down_up" style="float:left">
@@ -29,6 +29,8 @@
 
 
         <!-- Partie concernant les indices liés à l'énigme -->
+        <!-- Balise destinée à indiquer à JQuery où insérer les clues -->
+        <div class="clue_next"></div>
         {% if riddle.clues|length > 0 %}
         <div class="clues">
             <div style="text-decoration:underline">Indices :</div>
@@ -88,25 +90,66 @@
             e.preventDefault();
             var $button=$(this);
             var url = $button.attr('href');
-            var $riddle=$button.parent();
-
 
             $.ajax({
                 url: url,
                 success : function (data) {  // attendu dans 'data', une liste de json.
                     for (i in data) {
+                        //document.getElementById("debug").innerHTML +="Data : "+i+";Clues length :"+data[i].clues.length;
+                        // on adapte les réponses et les niveaux
+                        $("#riddlediv_"+i).find(".riddle").html("<b>Enigme : </b>"+data[i].riddle);
                         $("#riddlediv_"+i).find(".answer").text(data[i].answer);
+                        $("#riddlediv_"+i).find(".level").text(data[i].level);
+
+                        // On adapte les url
                         $("#riddlediv_"+i+" a").each(function() {
-                                $(this).css("background-color","red");
-                                //On adapte les url
                                 var url = $(this).attr('href');
                                 var new_target = "riddle_id="+data[i].id;
                                 url=url.replace(/riddle_id=([0-9]+)/,new_target);
                                 //document.getElementById("debug").innerHTML += 'url:'+url+"</br>\n";
                                 $(this).attr("href",url);
-                            });
+                        });
+                        // On adpate la liste des indices :
+                        // 1. En effaçant la liste des indices s'il existent pour l'énigme courante :
+                        //$("#riddlediv_"+i).find(".clue_next").css("background-color","blue").html("Je t'ai trouvé !");
+                        $("#riddlediv_"+i).find(".clues").remove();
 
+                        // 2. En recréant la liste des indices pour la nouvelle énigme s'il y en a :
+                        var clue_html="";
+                        var clue_list="";
 
+                        if (data[i].clues.length > 0) {
+                          document.getElementById("debug").innerHTML +="Data : "+i+";Clues length :"+data[i].clues.length;
+                          clue_html=
+                                `<div class="clues">\n
+                                \t<div style="text-decoration:underline">Indices :</div>\n
+                                \t<ul class="list-group">\n
+                                `;
+
+                            var clue_num=0;
+                            for (clue in data[i].clues) {
+                                clue_list +=
+                                    `<li class="list-group-item">\n
+                                     \t ${data[i].clues[clue_num].clue}
+                                     \t <a href="/delete_clue?riddle_id={data[i].id}">
+                                            <button type="button" class="btn btn-outline-danger btn-sm" style="float:right">Supprimer</button></a>\n
+                                     \t <a href="/update_clue?riddle_id={data[i].id}">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</button></a>\n
+                                     </li>\n
+                                    `;
+                                clue_num++;
+                            }
+                            clue_html=clue_html+clue_list+"</ul></div>";
+                            $("#riddlediv_"+i).find(".clue_next").html(clue_html);
+                        }
+                    }
+                    // Supprimer les énigmes superflues  dans la page (quand le nombre de JSON dans data < nombre d'énigmes affichées)
+                    var dom_count = $(".riddlediv").length;
+                    var json_count = data.length;
+                    while (dom_count > json_count) {
+                        //document.getElementById("debug").innerHTML += "DomCount:"+dom_count+";JsonCount :"+json_count+"</br>\n";
+                        $("#riddlediv_"+(dom_count-1)).remove();
+                        dom_count--;
                     }
                 }
             });
