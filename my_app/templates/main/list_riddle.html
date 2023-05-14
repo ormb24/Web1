@@ -38,11 +38,12 @@
                 {% for clue in riddle.clues %}
                 <li class="list-group-item">
                     {{ clue.clue }}
-                    <a href="{{url_for('main.delete_clue',riddle_id=riddle.id)}}"><button type="button" class="btn btn-outline-danger btn-sm" style="float:right">Supprimer</button></a>
-                    <a href="{{url_for('main.update_clue',riddle_id=riddle.id)}}"><button type="button" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</button></a>
+                    <a href="{{url_for('main.delete_clue',riddle_id=riddle.id,clue_id=clue.id)}}"><button type="button" class="btn btn-outline-danger btn-sm" style="float:right">Supprimer</button></a>
+                    <a href="{{url_for('main.clue',riddle_id=riddle.id,clue_id=clue.id)}}"><button type="button" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</button></a>
                 </li>
                 {% endfor %}
             </ul>
+            <a href="{{url_for('main.clue',riddle_id=riddle.id)}}"><button type="button" class="btn btn-outline-success btn-sm" style="margin-top:10px">Ajouter un indice</button></a>
         </div>
         {% endif %}
     </div>

@@ -8,27 +8,30 @@
         {{ form.riddle.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-8">
             {{ form.riddle(type="text",class="form-control",placeholder="Encodez votre énigme ici...") }}
+            {% if form.errors %} {% for message in form.riddle.errors %} {{ message }} {% endfor %} {% endif %} <br/>
         </div>
     </div>
     <div class="form-group row" style="margin-bottom:10px">
         {{ form.answer.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-8">
-             {{ form.answer(type="text",class="form-control",placeholder="Encodez sa réponse ici...") }}
+            {{ form.answer(type="text",class="form-control",placeholder="Encodez sa réponse ici...") }}
+            {% if form.errors %} {% for message in form.answer.errors %} {{ message }} {% endfor %} {% endif %} <br/>
         </div>
     </div>
     <div class="form-group row" style="margin-bottom:10px">
         {{ form.clue.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-8">
              {{ form.clue(type="text",class="form-control",placeholder="Encodez un indice...(optionel)") }}
+             {% if form.errors %} {% for message in form.clue.errors %} {{ message }} {% endfor %} {% endif %} <br/>
         </div>
     </div>
     <div class="form-group row" style="margin-bottom:10px">
         {{ form.level.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-2">
-             {{ form.level(class="form-control") }}
+            {{ form.level(class="form-control") }}
+            {% if form.errors %} {% for message in form.level.errors %} {{ message }} {% endfor %} {% endif %} <br/>
         </div>
     </div>
-
     {{ form.submit(class="btn btn-primary", value=action) }}
 </form>
 {% endblock %}

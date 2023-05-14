@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, flash, abort, jsonify, json
+from flask import render_template, redirect, url_for, request, flash, abort, jsonify
 from flask_login import login_required, current_user, logout_user
 
 from my_app.main import main
@@ -16,7 +16,7 @@ def infos():
 
 @main.route('/liste', methods=['GET','POST'])
 @login_required
-def list():
+def liste():
     return list_riddle()
 
 """ *******************
@@ -27,56 +27,34 @@ def list():
 @login_required
 def list_riddle():
     page = request.args.get('page', 1, type=int)
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     if current_user.admin:
         pagination = Riddle.query.paginate(page=page, per_page=5)
     else:
         pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
-
     riddles = pagination.items
-    num_list = []
-    for i in pagination.iter_pages(left_edge = 3, right_edge=3, left_current=3, right_current=3):
-        num_list.append(i)
-
-    #return jsonify({'json_list': [i.serialize for i in pagination.itms], 'pages_lst':num_list})
-
-
-
     return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
 
 @main.route('/list_riddle_ajax',methods=['GET','POST'])
 @login_required
 def list_riddle_ajax():
     page = request.args.get('page', 1, type=int)
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     if current_user.admin:
         pagination = Riddle.query.paginate(page=page, per_page=5)
     else:
         pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
-
-    """
-    pagination = Category.query.paginate(page=page, per_page=5)
-    categories = pagination.items
-    categories = Category.query.first()
-    """
     riddles = pagination.items
-
-    rep = riddles
-    return jsonify(rep)
+    return jsonify(riddles)
 
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
 def create_riddle():
+    validate_user();
     form = RiddleForm()
     form.id.data = 0
     return render_template("main/create_riddle.html",form=form, current_user=current_user, action="Create")
@@ -84,10 +62,7 @@ def create_riddle():
 @main.route('/update_riddle', methods=['GET'])
 @login_required
 def update_riddle():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     id = request.args.get('riddle_id')
     riddle = Riddle.query.filter_by(id=id).first()
@@ -111,10 +86,7 @@ def update_riddle():
 @main.route('/save_riddle',methods=['POST'])
 @login_required
 def save_riddle():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     form = RiddleForm()
     action = "Create"
@@ -164,20 +136,17 @@ def save_riddle():
 @main.route('/delete_riddle', methods=['GET'])
 @login_required
 def delete_riddle():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     id = request.args.get('riddle_id')
     riddle = Riddle.query.filter_by(id=id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
         abort(403)
+
     try:
         db.session.delete(riddle)
         db.session.commit()
-
     except BaseException as e:
         flash("L'énigme n'a pas été supprimée : "+ str(e),"Warning")
 
@@ -187,9 +156,14 @@ def delete_riddle():
 @main.route('/level', methods=['GET'])
 @login_required
 def level():
+    validate_user();
     id = request.args.get("riddle_id")
 
     riddle = Riddle.query.filter_by(id=id).first()
+    if not(riddle and (curent_user.admin or riddle.user_id ==current_user.id)):
+        flash("Cette éngime n'existe pas; ou vous n'êtes pas autorisé à la modifier !", "Danger")
+        #abort(403)
+        return redirect("/liste")
 
     if (request.args.get("direction") == 'up'):
         if (riddle.level<10):
@@ -197,9 +171,9 @@ def level():
     else:
         if (riddle.level >0):
             riddle.set_level(riddle.level - 1)
-
     db.session.commit()
     return str(riddle.level)
+
 
 """ ********************
     Controller : Clue
@@ -208,22 +182,17 @@ def level():
 @main.route('/list_clues',methods=['GET'])
 @login_required
 def list_clues():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
 
 @main.route('/clue', methods=['GET'])
 @login_required
 def clue():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     riddle_id = request.args.get('riddle_id')
-    clue = Clue.query.filter_by(riddle_id=riddle_id).first()
+    clue_id= request.args.get('clue_id')
+    clue = Clue.query.filter_by(id=clue_id).first()
     riddle = Riddle.query.filter_by(id=riddle_id).first()
     form = ClueForm()
 
@@ -247,19 +216,13 @@ def clue():
 @main.route('/update_clue', methods=['GET'])
 @login_required
 def update_clue():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
     return render_template("main/create_clue.html", form=form)
 
 @main.route('/save_clue',methods=['POST'])
 @login_required
 def save_clue():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
     form = ClueForm()
 
@@ -271,7 +234,7 @@ def save_clue():
         clue_record = Clue.query.filter_by(id=id).first()
         message = "L'indice a été modifié !"
     else:
-        clue_record = Clue(clue,riddle_id)
+        clue_record = Clue(clue=clue,riddle_id=riddle_id)
         message = "L'indice a été créé !"
 
     if form.validate_on_submit():
@@ -287,13 +250,11 @@ def save_clue():
 @main.route('/delete_clue', methods=['GET'])
 @login_required
 def delete_clue():
-    if current_user.blocked:
-        flash('Your account has been blocked by an administrator.', 'Danger')
-        logout_user()
-        return redirect(url_for('auth.login'))
+    validate_user();
 
-    riddle_id = request.args.get('riddle_id')
-    clue = Clue.query.filter_by(riddle_id=riddle_id).first()
+    riddle_id=request.args.get('riddle_id')
+    clue_id=request.args.get('clue_id')
+    clue = Clue.query.filter_by(id=clue_id).first()
     riddle = Riddle.query.filter_by(id=riddle_id).first()
 
     if not (current_user.admin) and not (riddle.user_id == current_user.id):
@@ -311,6 +272,17 @@ def delete_clue():
 
     return list_riddle()
 
+""" ********************
+    Helper functions :
+    ********************
+"""
+def validate_user():
+    if current_user.blocked:
+        flash('Your account has been blocked by an administrator.', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+    else:
+        return
 
 
 

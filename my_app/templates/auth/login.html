@@ -6,9 +6,11 @@
     <div class="form-row my-2">
     {{ form.email.label }} {{ form.email(size=20, class='form-control ') }}
     </div>
+    {% if form.errors %} {% for message in form.email.errors %} {{ message }} {% endfor %} {% endif %} <br/>
     <div class="form-row my-2">
     {{ form.password.label }} {{ form.password(size=20, class='form-control') }}
     </div>
+    {% if form.errors %} {% for message in form.password.errors %} {{ message }} {% endfor %} {% endif %} <br/>
     <div class="form-row my-3">
     {{ form.submit }}
     </div>
