@@ -4,7 +4,7 @@ from flask_login import login_required, current_user, logout_user
 from my_app.main import main
 from my_app.main.forms import RiddleForm, ClueForm
 from my_app import db
-from my_app.models import Riddle, Clue, User, Category
+from my_app.models import Riddle, Clue, User
 
 @main.route('/')
 @login_required
@@ -156,23 +156,29 @@ def delete_riddle():
 @main.route('/level', methods=['GET'])
 @login_required
 def level():
-    validate_user();
-    id = request.args.get("riddle_id")
+    validate_user()
 
-    riddle = Riddle.query.filter_by(id=id).first()
-    if not(riddle and (curent_user.admin or riddle.user_id ==current_user.id)):
+    riddle_id = request.args.get("riddle_id")
+    direction = request.args.get("direction")
+
+    logged_user = User.query.filter_by(id=current_user.id).first()
+    riddle = Riddle.query.filter_by(id=riddle_id).first()
+
+    if not(logged_user.admin or riddle.user_id == current_user.id):
         flash("Cette éngime n'existe pas; ou vous n'êtes pas autorisé à la modifier !", "Danger")
         #abort(403)
         return redirect("/liste")
 
-    if (request.args.get("direction") == 'up'):
+    if (direction == 'up'):
         if (riddle.level<10):
             riddle.set_level(riddle.level + 1)
     else:
         if (riddle.level >0):
             riddle.set_level(riddle.level - 1)
+
     db.session.commit()
     return str(riddle.level)
+
 
 
 """ ********************
@@ -283,7 +289,6 @@ def validate_user():
         return redirect(url_for('auth.login'))
     else:
         return
-
 
 
 """ ********************

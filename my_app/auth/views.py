@@ -1,5 +1,5 @@
 from flask import render_template, redirect, request, url_for, flash, session
-from flask_login import login_user,logout_user, current_user
+from flask_login import login_user,logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from my_app import db
@@ -70,3 +70,62 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
+@auth.route('/list_users',methods=['GET'])
+@login_required
+def list_users():
+    page = request.args.get('page', 1, type=int)
+    logged_user=User.query.filter_by(id=current_user.id).first()
+    if (not logged_user.admin):
+        flash('You must be administrator to display this page', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    pagination = User.query.paginate(page=page, per_page=5)
+    users = pagination.items
+    return render_template('auth/users.html',users = users,pagination = pagination)
+
+@auth.route('/setadmin',methods=['GET'])
+@login_required
+def setadmin():
+    logged_user = User.query.filter_by(id=current_user.id).first()
+    if (not logged_user.admin):
+        flash('You must be administrator to manage users', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    user_id = request.args.get('user_id')
+    action = request.args.get('action')
+    managed_user = User.query.filter_by(id=user_id).first()
+
+    if (action == 'promote'):
+        managed_user.admin=True
+    else:
+        managed_user.admin=False
+
+    db.session.add(managed_user)
+    db.session.commit()
+
+    return redirect(url_for('auth.list_users'))
+
+@auth.route('/setblocked',methods=['GET'])
+@login_required
+def setblocked():
+    logged_user = User.query.filter_by(id=current_user.id).first()
+    if (not logged_user.admin):
+        flash('You must be administrator to manage users', 'Danger')
+        logout_user()
+        return redirect(url_for('auth.login'))
+
+    user_id = request.args.get('user_id')
+    action = request.args.get('action')
+    managed_user = User.query.filter_by(id=user_id).first()
+
+    if (action == 'block'):
+        managed_user.blocked=True
+    else:
+        managed_user.blocked=False
+
+    db.session.add(managed_user)
+    db.session.commit()
+
+    return redirect(url_for('auth.list_users'))

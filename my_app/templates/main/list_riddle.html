@@ -24,7 +24,7 @@
             <a href="update_riddle?riddle_id={{riddle.id}}" class="btn btn-primary btn-sm update_riddle" title="Editer l'énigme">Modifier</a>
             <a href="delete_riddle?riddle_id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle" title="Supprimer l'énigme">Supprimer</a>
             {% if current_user.admin %}
-            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-info riddle_owner">{{riddle.user.username}}</a>
+            <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-dark btn-sm riddle_owner">{{riddle.user.username}}</a>
             {% endif %}
 
 
@@ -66,10 +66,11 @@
             e.preventDefault();
             var $button =$(this);
             var url = $button.attr('href');
-
+            //alert(url);
             $.ajax({
                 url: url,
                 success: function(new_value) {
+                    document.getElementById("debug").innerHTML +="Level : "+new_value;
                     $button.parent().find('.level').text(new_value);
                 }
             });

@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+{% block body %}
+<h1>Liste des utilisateurs</h1>
+<table class="table table-hover">
+    <thead>
+        <th scope="col">Id</th>
+        <th scope="col">Firstname</th>
+        <th scope="col">Lastname</th>
+        <th scope="col">Username</th>
+        <th scope="col">Email</th>
+        <th scope="col">Admin</th>
+        <th scope="col">Block/Unblock</th>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr scope="row">
+            <td>{{ user.id }}</td>
+            <td>{{ user.firstname }}</td>
+            <td>{{ user.lastname }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.admin %}
+                    <a href="{{url_for('auth.setadmin',user_id=user.id,action='demote')}}" class="btn btn-primary btn-sm">Demote admin</a>
+                {% else %}
+                    <a href="{{url_for('auth.setadmin',user_id=user.id,action='promote')}}" class="btn btn-warning btn-sm">Promote as admin</a>
+                {% endif %}
+            </td>
+            <td>
+                {% if user.blocked %}
+                    <a href="{{url_for('auth.setblocked',user_id=user.id,action='unblock')}}" class="btn btn-danger btn-sm">Unblock</a>
+                {% else %}
+                    <a href="{{url_for('auth.setblocked',user_id=user.id,action='block')}}" class="btn btn-warning btn-sm">Block</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

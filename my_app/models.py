@@ -41,6 +41,8 @@ class User(UserMixin,db.Model):
         return self.username
     def get_id(self):
         return self.id
+    def set_admin(self,is_admin):
+        self.admin=is_admin
 
 @dataclass
 class Riddle(db.Model):

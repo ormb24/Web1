@@ -19,13 +19,6 @@
         </div>
     </div>
     <div class="form-group row" style="margin-bottom:10px">
-        {{ form.clue.label(class="col-sm-1 col-form-label") }}
-        <div class="col-sm-8">
-             {{ form.clue(type="text",class="form-control",placeholder="Encodez un indice...(optionel)") }}
-             {% if form.errors %} {% for message in form.clue.errors %} {{ message }} {% endfor %} {% endif %} <br/>
-        </div>
-    </div>
-    <div class="form-group row" style="margin-bottom:10px">
         {{ form.level.label(class="col-sm-1 col-form-label") }}
         <div class="col-sm-2">
             {{ form.level(class="form-control") }}
