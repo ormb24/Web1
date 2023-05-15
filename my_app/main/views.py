@@ -1,4 +1,5 @@
-from flask import render_template, redirect, url_for, request, flash, abort, jsonify
+from flask import render_template, redirect, url_for, request, flash, abort, jsonify,json
+from flask import current_app
 from flask_login import login_required, current_user, logout_user
 
 from my_app.main import main
@@ -160,23 +161,27 @@ def level():
 
     riddle_id = request.args.get("riddle_id")
     direction = request.args.get("direction")
+    level_min = current_app.config['LEVEL_MIN']
+    level_max = current_app.config['LEVEL_MAX']
+
 
     logged_user = User.query.filter_by(id=current_user.id).first()
     riddle = Riddle.query.filter_by(id=riddle_id).first()
 
     if not(logged_user.admin or riddle.user_id == current_user.id):
-        flash("Cette éngime n'existe pas; ou vous n'êtes pas autorisé à la modifier !", "Danger")
+        flash("Vous n'êtes pas autorisé à modifier cette énigme !", "Danger")
         #abort(403)
         return redirect("/liste")
 
     if (direction == 'up'):
-        if (riddle.level<10):
+        if (riddle.level< level_max):
             riddle.set_level(riddle.level + 1)
     else:
-        if (riddle.level >0):
+        if (riddle.level > level_min):
             riddle.set_level(riddle.level - 1)
 
     db.session.commit()
+
     return str(riddle.level)
 
 
@@ -202,6 +207,9 @@ def clue():
     riddle = Riddle.query.filter_by(id=riddle_id).first()
     form = ClueForm()
 
+    if not (current_user.admin) and not (riddle.user_id == current_user.id):
+        abort(403)
+
     if clue:
         template = "main/update_clue.html"
         form.id.data = clue.id
@@ -214,9 +222,6 @@ def clue():
         form.clue.data= ""
         form.riddle.data = riddle.riddle
         form.riddle_id.data = riddle_id
-
-    if not (current_user.admin) and not (riddle.user_id == current_user.id):
-        abort(403)
 
     return render_template(template, form=form)
 @main.route('/update_clue', methods=['GET'])
@@ -270,13 +275,13 @@ def delete_clue():
         try:
             db.session.delete(clue)
             db.session.commit()
-            flash("L'indice a été supprimé !", "Success")
+            #flash("L'indice a été supprimé !", "Success")
         except BaseException as e:
             flash("L'indice n'a pas été supprimé : "+ str(e),"Warning")
     else:
         flash("Il n'y pas d'indice pour cette énigme ! ", "Warning")
 
-    return list_riddle()
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 """ ********************
     Helper functions :
@@ -289,7 +294,6 @@ def validate_user():
         return redirect(url_for('auth.login'))
     else:
         return
-
 
 """ ********************
     Controller : Error Pages
