@@ -12,18 +12,18 @@
             <div class="answer" style="display:none;margin-bottom:5px"><b><i>Réponse : </b></i>{{ riddle.answer }}</div>
             <!-- Riddle difficulty level -->
             <div style="float:left">
-                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='down')}}" class="level_down_up" style="float:left">
+                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='down')}}" class="level_down_up riddle_id" style="float:left">
                     <img src="/static/img/file-arrow-down-fill.svg" style="width:24px">
                 </a>
                 <div class="level" style="border:solid 1px;padding-left:10px; padding-right:10px;float:left">{{ riddle.level }}</div>
-                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='up')}}" class="level_down_up">
+                <a href="{{url_for('main.level',riddle_id=riddle.id,direction='up')}}" class="level_down_up riddle_id">
                     <img src="/static/img/file-arrow-up-fill.svg" style="width:24px">
                 </a>
             </div>
             <!-- ...............................-->
             <button class="btn btn-info btn-sm show_answer" >Afficher la réponse</button>
-            <a href="update_riddle?riddle_id={{riddle.id}}" class="btn btn-primary btn-sm update_riddle" title="Editer l'énigme">Modifier</a>
-            <a href="delete_riddle?riddle_id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle" title="Supprimer l'énigme">Supprimer</a>
+            <a href="update_riddle?riddle_id={{riddle.id}}" class="btn btn-primary btn-sm update_riddle riddle_id" title="Editer l'énigme">Modifier</a>
+            <a href="delete_riddle?riddle_id={{riddle.id}}" class="btn btn-danger btn-sm delete_riddle riddle_id" title="Supprimer l'énigme">Supprimer</a>
             {% if current_user.admin %}
             <a href="#" data-toggle="tooltip" title="{{riddle.user}}" class="btn btn-dark btn-sm riddle_owner">{{riddle.user.username}}</a>
             {% endif %}
@@ -31,21 +31,23 @@
 
         <!-- Partie concernant les indices liés à l'énigme -->
         <!-- Balise destinée à indiquer à JQuery où insérer les clues -->
-        <div class="clue_next"></div>
+
         <div class="clues">
             <div style="text-decoration:underline">Indices :</div>
+            <div class="clue_list"></div>
         {% if riddle.clues|length > 0 %}
             <ul class="list-group">
                 {% for clue in riddle.clues %}
+                <div class="clueid" style="display:none">{{ clue.id }}</div>
                 <li class="list-group-item">
                     {{ clue.clue }}
-                    <a href="{{url_for('main.delete_clue',riddle_id=riddle.id,clue_id=clue.id)}}" class="btn btn-outline-danger btn-sm delete_clue" style="float:right">Supprimer</a>
-                    <a href="{{url_for('main.clue',riddle_id=riddle.id,clue_id=clue.id)}}" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</a>
+                    <a href="{{url_for('main.delete_clue',riddle_id=riddle.id,clue_id=clue.id)}}" class="btn btn-outline-danger btn-sm delete_clue riddle_id clue_id" style="float:right">Supprimer</a>
+                    <a href="{{url_for('main.clue',riddle_id=riddle.id,clue_id=clue.id)}}" class="btn btn-outline-primary btn-sm riddle_id clue_id" style="float:right">Modifier</a>
                 </li>
                 {% endfor %}
             </ul>
         {% endif %}
-            <a href="{{url_for('main.clue',riddle_id=riddle.id)}}" class="btn btn-outline-success btn-sm" style="margin-top:10px">Ajouter un indice</a>
+            <a href="{{url_for('main.clue',riddle_id=riddle.id)}}" class="btn btn-outline-success btn-sm riddle_id" style="margin-top:10px">Ajouter un indice</a>
         </div>
 
     </div>
@@ -56,127 +58,12 @@
 {% endblock %}
 
 {% block footer %}
-<div class="pagination">
-    {{ macro.pagination_widget(pagination, 'main.list_riddle') }}
-</div>
+{{ macro.pagination_widget(pagination, 'main.list_riddle') }}
+
 {% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript">
-        // Mise à jour du niveau de difficulté :
-        $('.level_down_up').click(function(e) {
-            e.preventDefault();
-            var $button =$(this);
-            var url = $button.attr('href');
-            //alert(url);
-            $.ajax({
-                url: url,
-                success: function(new_value) {
-                    document.getElementById("debug").innerHTML +="Level : "+new_value;
-                    $button.parent().find('.level').text(new_value);
-                }
-            });
-        });
-        //Affichage de la réponse :
-        $(".show_answer").click(function() {
-            var $button=$(this);
-            if ($button.text() == "Afficher la réponse") {
-                $button.text("Cacher la réponse");
-                $button.parent().find(".answer").show();
-            } else {
-                $button.text("Afficher la réponse");
-                $button.parent().find(".answer").hide();
-            }
-        });
-
-        // Suppression d'énigmes
-        $('.delete_riddle').click(function(e) {
-            e.preventDefault();
-            var $button=$(this);
-            var url = $button.attr('href');
-
-            $.ajax({
-                url: url,
-                success : function (data) {  // attendu dans 'data', une liste de json.
-                    for (i in data) {
-                        //On passe les indices présent dans la page au même index dans le même ordre que ceux dans le JSON
-                        var riddleid = $("#riddlediv_"+i).find(".riddleid").text()
-                        if (riddleid == data[i].id) {
-                            continue;
-                        }
-                        //document.getElementById("debug").innerHTML +="Data : "+i+";Clues length :"+data[i].clues.length;
-                        // on adapte les réponses et les niveaux
-                        $("#riddlediv_"+i).find(".riddle").html("<b>Enigme : </b>"+data[i].riddle);
-                        $("#riddlediv_"+i).find(".answer").text(data[i].answer);
-                        $("#riddlediv_"+i).find(".level").text(data[i].level);
-
-                        // On adapte les url
-                        $("#riddlediv_"+i+" a").each(function() {
-                                var url = $(this).attr('href');
-                                var new_target = "riddle_id="+data[i].id;
-                                url=url.replace(/riddle_id=([0-9]+)/,new_target);
-                                //document.getElementById("debug").innerHTML += 'url:'+url+"</br>\n";
-                                $(this).attr("href",url);
-                        });
-                        // On adpate la liste des indices :
-                        // 1. En effaçant la liste des indices s'il existent pour l'énigme courante :
-                        //$("#riddlediv_"+i).find(".clue_next").css("background-color","blue").html("Je t'ai trouvé !");
-                        $("#riddlediv_"+i).find(".clues").remove();
-
-                        // 2. En recréant la liste des indices pour la nouvelle énigme s'il y en a :
-                        var clue_html="";
-                        var clue_list="";
-
-                        if (data[i].clues.length > 0) {
-                          document.getElementById("debug").innerHTML +="Data : "+i+";Clues length :"+data[i].clues.length;
-                          clue_html=
-                                `<div class="clues">\n
-                                \t<div style="text-decoration:underline">Indices :</div>\n
-                                \t<ul class="list-group">\n
-                                `;
-
-                            var clue_num=0;
-                            for (clue in data[i].clues) {
-                                clue_list +=
-                                    `<li class="list-group-item">\n
-                                     \t ${data[i].clues[clue_num].clue}
-                                     \t <a href="/delete_clue?riddle_id={data[i].id}">
-                                            <button type="button" class="btn btn-outline-danger btn-sm" style="float:right">Supprimer</button></a>\n
-                                     \t <a href="/update_clue?riddle_id={data[i].id}">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" style="float:right">Modifier</button></a>\n
-                                     </li>\n
-                                    `;
-                                clue_num++;
-                            }
-                            clue_html=clue_html+clue_list+"</ul></div>";
-                            $("#riddlediv_"+i).find(".clue_next").html(clue_html);
-                        }
-                    }
-                    // Supprimer les énigmes superflues  dans la page (quand le nombre de JSON dans data < nombre d'énigmes affichées)
-                    var dom_count = $(".riddlediv").length;
-                    var json_count = data.length;
-                    while (dom_count > json_count) {
-                        //document.getElementById("debug").innerHTML += "DomCount:"+dom_count+";JsonCount :"+json_count+"</br>\n";
-                        $("#riddlediv_"+(dom_count-1)).remove();
-                        dom_count--;
-                    }
-                }
-            });
-        });
-        // Suppression d'indices
-        $('.delete_clue').click(function(e) {
-            e.preventDefault();
-            var $button = $(this);
-            var url = $button.attr('href');
-            $.ajax({
-                url: url,
-                success: function (data) {
-                    //alert('bonjour:'+url);
-                    $button.parent().remove();
-                }
-            });
-        });
-    </script>
+<script src="{{ url_for('static', filename='js/list_riddle.js') }}"></script>
 {% endblock %}
 
 

@@ -27,8 +27,10 @@ def liste():
 @main.route('/list_riddle', methods=['GET'])
 @login_required
 def list_riddle():
+    validate_user()
     page = request.args.get('page', 1, type=int)
-    validate_user();
+    per_page = 5
+    tot_page = 2
 
     if current_user.admin:
         pagination = Riddle.query.paginate(page=page, per_page=5)
@@ -36,13 +38,15 @@ def list_riddle():
         pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
     riddles = pagination.items
-    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination)
+    return render_template('main/list_riddle.html', riddles=riddles, current_user=current_user, pagination=pagination, tot_page = tot_page, per_page = per_page)
 
 @main.route('/list_riddle_ajax',methods=['GET','POST'])
 @login_required
 def list_riddle_ajax():
     page = request.args.get('page', 1, type=int)
-    validate_user();
+    validate_user()
+    per_page = 5
+    tot_page = 20
 
     if current_user.admin:
         pagination = Riddle.query.paginate(page=page, per_page=5)
@@ -50,7 +54,12 @@ def list_riddle_ajax():
         pagination = Riddle.query.filter(Riddle.user_id == current_user.id).paginate(page=page, per_page=5)
 
     riddles = pagination.items
-    return jsonify(riddles)
+    dict = {
+        "riddles":riddles,
+        "per_page":per_page,
+        "tot_page":tot_page,
+    }
+    return jsonify(dict)
 
 @main.route('/create_riddle', methods=['GET','POST'])
 @login_required
@@ -224,11 +233,6 @@ def clue():
         form.riddle_id.data = riddle_id
 
     return render_template(template, form=form)
-@main.route('/update_clue', methods=['GET'])
-@login_required
-def update_clue():
-    validate_user();
-    return render_template("main/create_clue.html", form=form)
 
 @main.route('/save_clue',methods=['POST'])
 @login_required

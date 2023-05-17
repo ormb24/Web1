@@ -102,17 +102,3 @@
 </ul>
 {% endmacro %}
 
-
-<!-- par énigme, affiche les boutons : edit, delete; et l'utilisateur propriétaire, si l'on est admin. -->
-{% macro riddle_item(riddle) %}
-    <a href="update_riddle?id={{riddle.id}}" class="btn btn-warning" title="Editer l'énigme">Edit</a>
-    <a href="delete_riddle?id={{riddle.id}}" class="btn btn-danger" title="Effacer l'énigme">Delete</a>
-{% endmacro %}
-<!-- par énigme, affiche les actions possibles sur les indices : voir et ajouter-->
-{% macro clue_item(riddle) %}
-    {#<!--<button title="Montrer l'indice" onclick="showResponse(clue_{{ loop.index }})"><img src="/static/img/eye.svg"/></button>-->#}
-    <a href="/display_clue?riddle_id={{riddle.id}}"><button title="Afficher les indices"><img src="/static/img/eye.svg"></button></a>
-    <a href="/add_clue?riddle_id={{riddle.id}}"><button title="Ajouter un indice"><img src="/static/img/plus-lg.svg"></button></a>
-    {#<a href="/clue?riddle_id={{riddle.id}}"><button title="Créer / Mettre à jour l'indice"><img src="/static/img/search.svg"</button></a>
-    <a href="/delete_clue?riddle_id={{riddle.id}}"><button title="Delete"><img src="/static/img/trash.svg"</button></a>#}
-{% endmacro%}
