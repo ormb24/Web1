@@ -1,7 +1,7 @@
 
 | CLDR name                      | Grammar name | Unicode | Icon                                  |
 | ------------------------------ | ------------ | ------- | ------------------------------------- |
-| oncoming police car            | POLICE       | 1F694   | ![[oncoming-police-car.png]]          |
+| oncoming police car            | POLICE       | 1F694   | ![[oncoming-police-car.png]] (./img/emoji/oncoming-police-car.png)|
 | motorway                       | MOTORWAY     | 1F6E3   | ![[motorway.png]]                     |
 | volcano                        | VOLCANO      | 1F30B   | ![[volcano.png]]                      |
 | houses                         | HOUSES       | 1F3D8   | ![[houses.png]]                       |
